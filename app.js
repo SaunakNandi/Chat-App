@@ -13,6 +13,8 @@ import cookieParser from 'cookie-parser'
 dotenv.config({
     path:'./.env'
 })
+
+export const envMode=process.env.NODE_ENV.trim() || "PRODUCTION"
 connectDB(process.env.MONGO_URL)
 // createUser(10)
 // createSingleChat(10)
@@ -28,7 +30,7 @@ app.use('/user',userRoute)
 app.use('/chat',chatRoute)
 
 app.listen(3000,()=>{
-    console.log('Server is running on port 3000')
+    console.log(`Server is running on port 3000 in ${envMode} mode`)
 })
 
 app.get('/',(req,res)=>{

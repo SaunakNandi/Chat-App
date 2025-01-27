@@ -151,12 +151,13 @@ const leaveGroup=async(req,res,next)=>{
 
 const sendAttachment = async function(req,res,next){
     const {chatId}=req.body
+    const files=req.files || []
+
     const [chat,me]=await Promise.all([Chat.findById(chatId),User.findById(req.user,"name")])
     if(!chat) return next(new ErrorHandler('Not in your friend list',404))
         
-    const files=req.files || []
     if(files.length<1) return next(new ErrorHandler('No file uploaded',400))
-    
+    if(files.length>5) return next(new ErrorHandler(`Files can't be more than 4`,400))
     // upload files
     const attachments=[]
     const messageForDB={content:"",attachments,sender:me._id,chat:chatId}

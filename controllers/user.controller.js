@@ -24,21 +24,27 @@ const login=async(req,res,next)=>{
 }
 
 const newUser=async(req,res)=>{
-    const {name,username,password,bio} = req.body
-    console.log(req.body)
-    const avatar={
-        public_id:'sdfsd',
-        url:'asdfd'
+    try {
+        const {name,username,password,bio} = req.body
+        // console.log(req.body)
+        const file=req.file
+        if(!file) return next(new ErrorHandler('Please uplaoda file file',11000))
+        const avatar={
+            public_id:'sdfsd',
+            url:'asdfd'
+        }
+        const user=await User.create({
+            name,
+            username,
+            password,
+            bio,
+            avatar
+        })
+    
+        sendToken(res,user,200,'User Created Successfully')
+    } catch (error) {
+        console.log(error)
     }
-    const user=await User.create({
-        name,
-        username,
-        password,
-        bio,
-        avatar
-    })
-
-    sendToken(res,user,200,'User Created Successfully')
 }
 
 const getMyProfile=async(req,res,next)=>{
