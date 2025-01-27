@@ -1,0 +1,110 @@
+app.use('/user',userRoute)
+app.use(errorMiddleware)
+
+// userRoute points this router 
+router.post('/login',login)
+
+const login=async(req,res,next)=>{
+    try {
+        const {username,password}=req.body
+        const user=await User.findOne({username}).select('+password')
+        if(!user) return next(new ErrorHandler('Invalid credentials',404)) 
+        const isMatch=await compare(password,user.password)
+        if(!isMatch) return next(new ErrorHandler('Invalid credentials',404)) 
+
+    } catch (error) {
+        next(error)
+        
+    }
+}
+
+code for errorMiddleware
+
+const errorMiddleware=(err,req,res,next)=>{
+    err.message=err.message || 'Internal Server Error'
+    err.statusCode=err.statusCode || 500
+
+    return res.status(err.statusCode).json({
+        success:false,
+        message:err.message,
+    })
+}
+
+code for ErrorHandler
+class ErrorHandler extends Error{
+    constructor(message,statusCode){
+        super(message)
+        this.statusCode=statusCode
+    }
+}
+
+I understand the error handling but how this errorMiddleware is getting triggered and how ErrorHandler is working
+
+ANSWER
+
+Error Handling Middleware:
+
+If an error is passed to next(error), it bypasses any remaining non-error middleware and is caught by the errorMiddleware.
+
+2. How errorMiddleware is Triggered
+The key mechanism here is Express's built-in error-handling flow. When next(error) is called:
+
+Express skips all other non-error middleware and jumps directly to the middleware that has the signature (err, req, res, next).
+In your case, this is the errorMiddleware.
+Here’s how it works:
+
+If next(new ErrorHandler(...)) is invoked, it passes the ErrorHandler instance (which is an error object) to the next error-handling middleware.
+The errorMiddleware receives this err object and processes it:
+Defaults the err.message to "Internal Server Error" if not already set.
+Defaults the err.statusCode to 500 if not already set.
+Sends a JSON response containing the error message and status code.
+3. Role of the ErrorHandler Class
+The ErrorHandler class is a custom error object that extends JavaScript's native Error class. It adds a statusCode property, making it easier to handle HTTP errors.
+
+Key Features of ErrorHandler:
+Custom Message:
+
+The constructor accepts a message and statusCode, which are stored as properties.
+new ErrorHandler('Invalid credentials', 404)
+
+Extending the Native Error:
+By calling super(message), the ErrorHandler inherits all the behavior of the native Error class.
+
+Usage in login Function:
+When next(new ErrorHandler(...)) is called, the ErrorHandler instance is passed to the errorMiddleware.
+
+What Happens When You Extend Error:
+The Error class is the built-in mechanism in JavaScript for handling errors.
+When you use super(message) in the constructor, it initializes the parent Error class, meaning:
+The ErrorHandler object behaves like an error (it has a message property and can be thrown or passed to next()).
+It inherits all the standard properties and behaviors of an Error object.
+
+So, when you call:
+next(new ErrorHandler('Invalid credentials', 404));
+The ErrorHandler instance is treated as an Error object by Express.
+
+2. Express Error Handling Flow
+In Express, if you pass an object to next(), Express treats it as an error if:
+
+It is an instance of Error, or
+It has a recognizable error-like structure (such as a message property).
+Since ErrorHandler extends Error, it satisfies the first condition.
+
+Express identifies an error-handling middleware by its function signature:
+(err, req, res, next) => { /* handle the error */ }
+If a middleware function has four arguments (err, req, res, next), Express automatically assumes it is an error-handling middleware.
+
+
+3. Why Does next(new ErrorHandler(...)) Work?
+When next(error) is called with an argument:
+
+Express detects that an error was passed (the argument exists and is an error object or treated as one).
+Express skips all non-error middleware and directly calls the first middleware it finds with the (err, req, res, next) signature.
+Since ErrorHandler is an instance of Error, it behaves like an error object. It contains the message property (inherited from Error) and any custom properties you add, like statusCode.
+
+4. Clarification About Middleware Signature
+Your ErrorHandler class or instance itself does not have a signature like (err, req, res, next)—it's just an object. However, when you pass it to next(), Express:
+
+Detects that an error was passed to next().
+Passes this error object (ErrorHandler instance) as the err argument to the nearest error-handling middleware.
+The error-handling middleware does have the (err, req, res, next) signature, and it receives the ErrorHandler instance as err.
