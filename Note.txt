@@ -1,0 +1,49 @@
+// note1
+
+reducerPath: 'api'
+Defines the name of the reducer in the store.
+
+baseQuery
+Sets up a base URL (${server}/api/v1/).
+
+tagTypes: ["Chat"]
+Declares cache tags. Useful for automatically re-fetching data when mutations (POST, DELETE, etc.) occur.
+
+
+endponits: 
+myChats Query
+
+builder.query
+Defines a GET request for fetching chat data.
+
+query: () => ({ url: "chat/my", credentials: "include" })
+Specifies the API endpoint (/api/v1/chat/my).
+
+credentials: "include" ensures that authentication tokens (cookies, sessions, JWTs) are sent with the request.
+
+providesTags: ["Chat"]
+Caches the response under the "Chat" tag.
+If another API call invalidates "Chat", RTK Query automatically refetches the latest data.
+
+Invalidation in RTK Query means marking cached data as stale so that it triggers a refetch on the next request.
+
+createApi() automatically generates React hooks for each query/mutation.
+Since you defined myChats: builder.query(...), RTK Query creates
+useMyChatsQuery = api.endpoints.myChats.useQuery;
+
+useMyChatsQuery
+This is a custom hook that:
+Fetches data from /api/v1/chat/my.
+Uses caching, re-fetching, and state management automatically.
+
+
+=> How It Works Step-by-Step
+User loads the chat layout.
+useMyChatsQuery() fetches chat data from GET /api/v1/chat/my.
+If the response is cached (from a previous request), it is instantly available.
+If not, Redux Toolkit Query:
+Sends an API request.
+Stores the result in Redux state.
+Caches it with the "Chat" tag.
+The ChatList component displays the fetched chat list.
+If a new friend is added, the "Chat" tag gets invalidated, automatically refetching the chat list.

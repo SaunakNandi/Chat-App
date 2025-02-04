@@ -5,13 +5,19 @@ import { Add as AddIcon, Group as GroupIcon, Menu as MenuIcon, Search as SearchI
     Notifications as NotificationsIcon } from '@mui/icons-material'
 import { useNavigate } from 'react-router-dom'
 import { IconBtn } from '../shared/IconBtn'
+import axios from 'axios'
+import { useDispatch } from 'react-redux'
+import { userNotExists } from '../../redux/reducers/auth'
+import toast from 'react-hot-toast'
 
 const SearchBox=lazy(()=> import('../specific/SearchBox'))
 const NotificationBell=lazy(()=> import('../specific/NotificationsBell'))
 const NewGroups=lazy(()=> import('../specific/NewGroups'))
 
 const Header = () => {
+  const server=import.meta.env.VITE_SERVER
     const navigate=useNavigate()
+    const dispatch=useDispatch()
     const [ismobile,setIsMobile]=useState(false)
     const [isSearch,setIsSearch]=useState(false)
     const [isNewGroup,setIsNewGroup]=useState(false)
@@ -30,9 +36,19 @@ const Header = () => {
         navigate('/groups')
 
     }
-    const logoutHandler=()=>{
+    const logoutHandler=async()=>{
         // Logout logic here
-        navigate('/login')
+        try {
+            const {data}=await axios.get(`${server}/api/v1/user/logout`,{
+                withCredentials:true,
+            })
+            navigate('/login')
+            dispatch(userNotExists())
+            toast.success(data.message)
+        } catch (error) {
+            console.error(error)
+            toast.error(error?.response?.data?.message || "Something went wrong")
+        }
     }
     const openNotification=()=>{
         setIsNotification(prev=>!prev)

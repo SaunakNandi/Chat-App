@@ -1,20 +1,43 @@
-import { useState,lazy, Suspense } from 'react' 
+import { lazy, Suspense, useEffect } from 'react' 
 import './App.css'
 import { Route, Routes } from 'react-router-dom'
 import ProtectRoute from './components/auth/ProtectRoute'
 import Loader from './components/layout/Loader'
-
+import { useDispatch, useSelector } from 'react-redux'
+import { userNotExists,userExists } from './redux/reducers/auth'
+import axios from 'axios'
+import {Toaster} from 'react-hot-toast'
 const Home = lazy(() => import('./pages/Home'))
 const Login = lazy(() => import('./pages/Login'))
 const Chat = lazy(() => import('./pages/Chat'))
 const Groups = lazy(() => import('./pages/Groups'))
 const NotFound = lazy(() => import('./pages/NotFound'))
 
-let user=true
-function App() {
 
-  return (
-    <Suspense fallback={<Loader/>}>
+function App() {
+  const server=import.meta.env.VITE_SERVER
+  const dispatch = useDispatch()
+  const {user,loader}=useSelector(state=>state.auth)
+  console.log(loader)
+  async function fetchUser(){
+    try {
+      const res=await axios.get(`${server}/api/v1/user/me`,{
+        withCredentials:true,
+      })
+      console.log(res.data)
+      dispatch(userExists(res.data.user))
+    } catch (error) {
+      console.error(error)
+      dispatch(userNotExists())
+    }
+  }
+  console.log(user)
+  useEffect(()=>{
+    fetchUser()
+  },[dispatch])
+  return loader? <Loader/> : (
+    <>
+      <Suspense fallback={<Loader />}>
         <Routes>
           {/* These will be under outlet */}
           <Route element={<ProtectRoute user={user} />}>
@@ -28,9 +51,10 @@ function App() {
               <Login />
             </ProtectRoute>
           } />
-          <Route path='*' element={<NotFound />} />
         </Routes>
-    </Suspense>
+      </Suspense>
+        <Toaster position='bottom-center'/>
+    </>
   )
 }
 

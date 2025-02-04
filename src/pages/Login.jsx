@@ -4,6 +4,12 @@ import { CameraAlt } from '@mui/icons-material'
 import { VisuallyHiddenInput } from '../components/styles/StyledComponent'
 import { useInputValidation,useFileHandler } from '6pp'
 import { PasswordValidator, usernameValidator } from '../utils/validators'
+import axios from 'axios'
+import { useDispatch } from 'react-redux'
+import { userExists } from '../redux/reducers/auth'
+import toast from 'react-hot-toast'
+import {server} from '../../constants/config'
+
 const Login = () => {
   const [isLogin, setIsLogin] = useState(true)
   const name=useInputValidation("")
@@ -12,13 +18,55 @@ const Login = () => {
   // console.log(username)
   const password=useInputValidation("",PasswordValidator)
   const avatar=useFileHandler('single')
-
-  const handleSignup=(e)=>{
+  const dispatch=useDispatch()
+  const config={
+    withCredentials:true,
+    headers:{
+      'Content-Type':'application/json'
+    }
+}
+  const handleSignup=async(e)=>{
     e.preventDefault()
+
+    const formData=new FormData()
+    formData.append('avatar',avatar.file)
+    formData.append('name',name)
+    formData.append('bio',bio)
+    formData.append('username',username.value)
+    formData.append('password',password.value)
+
+    try {
+      const {data}=await axios.post(`${server}/api/v1/user/new`,formData,
+      {
+        withCredentials:true,
+        headers:{
+          "Content-Type":"multipart/form-data",
+        }
+      })
+      console.log(data)
+      dispatch(userExists(data.user))
+      toast.success(data.message)
+    } catch (error) {
+      console.log(error)
+      toast.error(error?.response?.data?.message || "Something went wrong")
+    }
   }
   
-  const handleLogin=(e)=>{
+  const handleLogin=async(e)=>{
     e.preventDefault()
+    try {
+      
+      const {data}=await axios.post(`${server}/api/v1/user/login`,{
+        username:username.value,
+        password:password.value
+      }, config)
+      console.log(data)
+      dispatch(userExists(data.user))
+      toast.success(data.message)
+    } catch (error) {
+      toast.error(error?.response?.data?.message || "Something went wrong")
+      console.log(error)
+    }
   }
   return (
     <div style={{backgroundImage:'linear-gradient(rgb(255,255,210),rgb(249,159,159))'}}>
@@ -36,8 +84,10 @@ const Login = () => {
               <>
               <Typography variant="h5">Login</Typography>
               <form style={{width:'100%',marginTop:"1rem"}} onSubmit={handleLogin}>
-                <TextField required label="Username" margin="normal" variant="outlined" fullWidth/>
-                <TextField required label="Password" margin="normal" variant="outlined" fullWidth type="password"/>
+                <TextField required label="Username" margin="normal" variant="outlined" fullWidth
+                value={username.value} onChange={username.changeHandler}/>
+                <TextField required label="Password" margin="normal" variant="outlined" fullWidth type="password"
+                value={password.value} onChange={password.changeHandler}/>
                 <Button sx={{marginTop:'1rem'}} variant="contained" color="primary" type="submit" fullWidth>Login</Button>
                 <Typography textAlign={"center"} m={"1rem"}>or</Typography>
                 <Button variant="text" fullWidth onClick={()=>setIsLogin(false)}>Signup instead</Button>
@@ -53,9 +103,9 @@ const Login = () => {
                       height:'10rem',
                       objectFit:'contain'
                     }}
-                    src={{
-                      src:avatar.preview
-                    }}/>
+                    src={
+                      avatar.preview
+                    }/>
                     <IconButton sx={{
                       position:'absolute',
                       bottom:0,
