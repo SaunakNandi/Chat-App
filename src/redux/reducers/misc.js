@@ -1,22 +1,60 @@
 import { createSlice } from "@reduxjs/toolkit";
 const initialState={
-    user:null,
-    isAdmin:false,
-    loader:true,
+    isNewGroup:false,
+    isAddMember:false,
+    isNotification:false,
+    isMobile:false,
+    isSearch:false,
+    isFileMenu:false,
+    isDeletemenu:false,
+    uploadingLoader:false,
+    selectedDeleteChat:{
+        chatId:"",
+        groupChat:false,
+    }
 }
 const miscSlice=createSlice({
     name:"misc",
     initialState,
     reducers:{
-        userExists:(state,action)=>{
-            state.user=action.payload
-            state.loader=false
+        setIsNewGroup:(state,action)=>{
+            state.isNewGroup=action.payload
         },
-        userNotExists:(state)=>{
-            state.user=null;
-            state.loader=false;
+        setIsAddMember:(state,action)=>{
+            state.isAddMember=action.payload
+        },
+        setIsNotification:(state,action)=>{
+            state.isNotification=action.payload
+        },
+        setIsMobile:(state,action)=>{
+            state.isMobile=action.payload
+        },
+        setIsSearch:(state,action)=>{
+            state.isSearch=action.payload
+        },
+        setIsFileMenu:(state,action)=>{
+            state.isFileMenu=action.payload
+        },
+        setIsDeletemenu:(state,action)=>{
+            state.isDeletemenu=action.payload
+        },
+        setUploadingLoader:(state,action)=>{
+            state.uploadingLoader=action.payload
+        },
+        setSelectedDeleteChat:(state,action)=>{
+            state.selectedDeleteChat=action.payload
         }
     }
 })
 export default miscSlice
-export const {userExists,userNotExists}=miscSlice.actions
+export const {
+    setIsNewGroup,
+    setIsAddMember,
+    setIsNotification,
+    setIsMobile,
+    setIsSearch,
+    setIsFileMenu,
+    setIsDeletemenu,
+    setUploadingLoader,
+    setSelectedDeleteChat,
+}=miscSlice.actions

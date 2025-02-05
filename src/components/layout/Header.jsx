@@ -6,9 +6,10 @@ import { Add as AddIcon, Group as GroupIcon, Menu as MenuIcon, Search as SearchI
 import { useNavigate } from 'react-router-dom'
 import { IconBtn } from '../shared/IconBtn'
 import axios from 'axios'
-import { useDispatch } from 'react-redux'
+import { useDispatch,useSelector } from 'react-redux'
 import { userNotExists } from '../../redux/reducers/auth'
 import toast from 'react-hot-toast'
+import { setIsMobile, setIsSearch } from '../../redux/reducers/misc'
 
 const SearchBox=lazy(()=> import('../specific/SearchBox'))
 const NotificationBell=lazy(()=> import('../specific/NotificationsBell'))
@@ -18,16 +19,16 @@ const Header = () => {
   const server=import.meta.env.VITE_SERVER
     const navigate=useNavigate()
     const dispatch=useDispatch()
-    const [ismobile,setIsMobile]=useState(false)
-    const [isSearch,setIsSearch]=useState(false)
+    const {isSearch}=useSelector(state=>state.misc)
+
     const [isNewGroup,setIsNewGroup]=useState(false)
     const [isNotification,setIsNotification]=useState(false)
 
     const handleMobile=()=>{
-        setIsMobile(prev=>!prev)
+        dispatch(setIsMobile(true))
     }
     const openSearch=()=>{
-        setIsSearch(prev=>!prev)
+        dispatch(setIsSearch(true))
     }
     const openNewGroup=()=>{
         setIsNewGroup(prev=>!prev)

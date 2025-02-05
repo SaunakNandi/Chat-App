@@ -8,7 +8,7 @@ import axios from 'axios'
 import { useDispatch } from 'react-redux'
 import { userExists } from '../redux/reducers/auth'
 import toast from 'react-hot-toast'
-import {server} from '../../constants/config'
+import {server} from '../constants/config'
 
 const Login = () => {
   const [isLogin, setIsLogin] = useState(true)
@@ -30,8 +30,8 @@ const Login = () => {
 
     const formData=new FormData()
     formData.append('avatar',avatar.file)
-    formData.append('name',name)
-    formData.append('bio',bio)
+    formData.append('name',name.value)
+    formData.append('bio',bio.value)
     formData.append('username',username.value)
     formData.append('password',password.value)
 

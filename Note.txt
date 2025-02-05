@@ -36,6 +36,8 @@ This is a custom hook that:
 Fetches data from /api/v1/chat/my.
 Uses caching, re-fetching, and state management automatically.
 
+useMyChatsQuery is an auto-generated hook by RTK Query.
+
 
 => How It Works Step-by-Step
 User loads the chat layout.
@@ -47,3 +49,10 @@ Stores the result in Redux state.
 Caches it with the "Chat" tag.
 The ChatList component displays the fetched chat list.
 If a new friend is added, the "Chat" tag gets invalidated, automatically refetching the chat list.
+
+
+=> Key Benefits of This Approach
+✅ Automatic Caching – Prevents redundant API calls.
+✅ Tag-Based Invalidation – Ensures fresh data when needed(when a get or post call is made).
+✅ Efficient State Management – Data is stored in Redux and auto-updates the UI.
+✅ Simplified API Handling – No need for manual useState/useEffect.

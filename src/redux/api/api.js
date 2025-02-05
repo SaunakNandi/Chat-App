@@ -11,7 +11,7 @@ const api=createApi({
     baseQuery:fetchBaseQuery({
         baseUrl:`${server}/api/v1/`,
     }),
-    tagTypes:["Chat"],
+    tagTypes:["Chat","User"],
     endpoints:(builder)=>({
         // query for get requests
         myChats:builder.query({
@@ -24,8 +24,30 @@ const api=createApi({
         }),
         // invalidateTags in mutation
         // invalidateTags:["Chat"] // refetching to load chats for new added friend
+
+        searchUser:builder.query({
+            query:(name)=>(
+                {
+                    url:`user/search?name=${name}`,
+                    credentials:"include"
+                }
+            ),
+            providesTags:["User"]
+        }),
+        sendFriendRequest:builder.mutation({
+            query:(data)=>({
+                url:"/user/send-req",
+                method:"Put",
+                credentials:"include",
+                body:data,
+            }),
+            invalidatesTags:["User"]
+        })
     })
 })
 
+console.log(api.endpoints) // to about the hooks created for the corresponding endpoints
+    
+
 export default api
-export const {useMyChatsQuery}=api
+export const {useMyChatsQuery,useLazySearchUserQuery,useSendFriendRequestMutation}=api
