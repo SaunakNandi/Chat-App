@@ -27,11 +27,11 @@ const AppLayout = () =>(WrappedComponent)=> {
     //     refetch       // Function to manually refetch data
     //   }
     const {isLoading,data,isError,error,refetch}=useMyChatsQuery("")
+    console.log(data)
     
     useErrors([{error,isError}])
     const {isMobile}=useSelector((state)=>state.misc)
-    console.log(data)
-
+    const {user}=useSelector((state)=>state.auth)
     const handleMobileClose=()=>{
         dispatch(setIsMobile(false))
     }
@@ -82,7 +82,7 @@ const AppLayout = () =>(WrappedComponent)=> {
                         bgcolor: "rgba(90, 88, 88, 0.85)",
                     }}
                 >
-                    <Profile/>
+                    <Profile user={user}/>
                 </Grid>
             </Grid>
         </>
