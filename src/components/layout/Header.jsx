@@ -9,7 +9,7 @@ import axios from 'axios'
 import { useDispatch,useSelector } from 'react-redux'
 import { userNotExists } from '../../redux/reducers/auth'
 import toast from 'react-hot-toast'
-import { setIsMobile, setIsSearch } from '../../redux/reducers/misc'
+import { setIsMobile, setIsNotification, setIsSearch } from '../../redux/reducers/misc'
 
 const SearchBox=lazy(()=> import('../specific/SearchBox'))
 const NotificationBell=lazy(()=> import('../specific/NotificationsBell'))
@@ -19,10 +19,8 @@ const Header = () => {
   const server=import.meta.env.VITE_SERVER
     const navigate=useNavigate()
     const dispatch=useDispatch()
-    const {isSearch}=useSelector(state=>state.misc)
-
+    const {isSearch,isNotification}=useSelector(state=>state.misc)
     const [isNewGroup,setIsNewGroup]=useState(false)
-    const [isNotification,setIsNotification]=useState(false)
 
     const handleMobile=()=>{
         dispatch(setIsMobile(true))
@@ -52,7 +50,7 @@ const Header = () => {
         }
     }
     const openNotification=()=>{
-        setIsNotification(prev=>!prev)
+        dispatch(setIsNotification(true))
     }
   return (
     <>

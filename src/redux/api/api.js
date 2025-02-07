@@ -34,6 +34,7 @@ const api=createApi({
             ),
             providesTags:["User"]
         }),
+
         sendFriendRequest:builder.mutation({
             query:(data)=>({
                 url:"/user/send-req",
@@ -42,12 +43,31 @@ const api=createApi({
                 body:data,
             }),
             invalidatesTags:["User"]
+        }),
+
+        acceptFriendRequest:builder.mutation({
+            query:(data)=>({
+                url:"/user/accept-req",
+                method:"PUT",
+                credentials:"include",
+                body:data,
+            }),
+            invalidatesTags:["Chat"] // refetching to load chats for new added friend
+        }),
+
+        getNotifications:builder.query({
+            query:()=>({
+                url:`user/notifications`,
+                credentials:"include"
+            }),
+            keepUnusedDataFor:0  // no caching
         })
     })
 })
 
-console.log(api.endpoints) // to about the hooks created for the corresponding endpoints
+console.log(api.endpoints?.acceptFriendRequest) // to about the hooks created for the corresponding endpoints
     
 
 export default api
-export const {useMyChatsQuery,useLazySearchUserQuery,useSendFriendRequestMutation}=api
+export const {useMyChatsQuery,useLazySearchUserQuery,useSendFriendRequestMutation,useGetNotificationsQuery,
+    useAcceptFriendRequestMutation}=api

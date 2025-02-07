@@ -7,6 +7,7 @@ import { useDispatch, useSelector } from 'react-redux'
 import { userNotExists,userExists } from './redux/reducers/auth'
 import axios from 'axios'
 import {Toaster} from 'react-hot-toast'
+import { SocketProvider } from './socket'
 const Home = lazy(() => import('./pages/Home'))
 const Login = lazy(() => import('./pages/Login'))
 const Chat = lazy(() => import('./pages/Chat'))
@@ -40,8 +41,12 @@ function App() {
       <Suspense fallback={<Loader />}>
         <Routes>
           {/* These will be under outlet */}
-          <Route element={<ProtectRoute user={user} />}>
-
+          <Route element={
+            <SocketProvider>
+              <ProtectRoute user={user} />
+            </SocketProvider>
+          }>
+            {/* Now sockets can be accessed by this route */}
             <Route path='/' element={<Home />} />
             <Route path='/chat/:chatId' element={<Chat />} />
             <Route path='/groups' element={<Groups />} />

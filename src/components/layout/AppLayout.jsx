@@ -11,11 +11,12 @@ import { Drawer, Skeleton } from '@mui/material'
 import { useDispatch, useSelector } from 'react-redux'
 import { setIsMobile } from '../../redux/reducers/misc'
 import { useErrors } from '../../hooks/hook'
+import { getSocket } from '../../socket'
 
 // HOC
 const AppLayout = () =>(WrappedComponent)=> {
   return (props)=>{
-
+    const socket=getSocket()
     const params=useParams()
     const chatId=params.chatId
     const dispatch=useDispatch()
@@ -39,6 +40,7 @@ const AppLayout = () =>(WrappedComponent)=> {
         e.preventDefault()
         console.log("Deleting chat", _id)
     }
+    
     return(
         <>
             <Title/>
