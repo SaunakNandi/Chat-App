@@ -33,7 +33,7 @@ const userSchema = new Schema({
 
 // hash password before 'save'
 userSchema.pre('save',async function(next){
-    if(!this.isModified(('password'))) next()
+    if(!this.isModified(('password'))) return next()
     this.password = await hash(this.password,10)
 })
 export const User=model("User",userSchema)

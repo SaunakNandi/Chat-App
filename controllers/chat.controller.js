@@ -207,7 +207,7 @@ const getChatDetails = async function(req,res,next){
             })
         }
     } catch (error) {
-        console.log(error)
+        console.log("getChatDetails",error)
     }
 }
 
@@ -267,7 +267,7 @@ const deleteChat = async function(req,res,next){
             message:"Chat deleted successfully"
         })
     } catch (error) {
-        console.log(error)
+        console.log("delete chat ",error)
     }
 }
 
@@ -288,7 +288,7 @@ const getMessages=async (req,res,next)=>{
             totalPages
         })
     } catch (error) {
-        console.log(error)
+        console.log("get Message Error ",error)
     }
 }
 export {newGroupChat,getMyChats,getMyGroups,addMembers,removeMembers,leaveGroup,sendAttachment,getChatDetails,renameGroup,deleteChat,getMessages}

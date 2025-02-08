@@ -10,9 +10,11 @@ router.post('/login',loginValidator(),validateHandler,login)
 router.post('/new',singleAvatar,registerValidator(),validateHandler,newUser)
 
 
-router.use(isAuthenticated) // serving as middleware
+router.use(isAuthenticated) // serving as middleware and it pass the user_id to all the functions
 // router.get('/me',isAuthenticated,getMyProfile)
-router.get('/me',isAuthenticated,getMyProfile)
+
+
+router.get('/me',getMyProfile)
 router.get('/logout',logout)
 router.get('/search',searchUser)
 router.put('/send-req',sendRequestValidator(),validateHandler,sendFrndReq)

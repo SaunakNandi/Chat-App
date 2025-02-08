@@ -2,15 +2,16 @@ import { compare } from 'bcrypt'
 import {User} from '../models/user.models.js'
 import {Chat} from '../models/chat.models.js'
 import {Request} from '../models/request.models.js'
-import { cookieOption, emitEvent, sendToken } from '../utils/features.js'
+import { cookieOption, emitEvent, sendToken, uploadFilesToCloudinary } from '../utils/features.js'
 import { ErrorHandler } from '../utils/utility.js'
 import { NEW_REQUEST, REFETCH_CHATS } from '../constants/events.js'
 import { getOtherMember } from '../lib/helper.lib.js'
 
 const login=async(req,res,next)=>{
     try {
+        // console.log(req.body)
         const {username,password}=req.body
-        console.log(username,password)
+        // console.log(username,password)
         const user=await User.findOne({username}).select('+password')
         if(!user) return next(new ErrorHandler('Invalid user',404)) // this next will go to the errorMiddleware
            // return res.status(400).json({success:false,message:'Invalid Credentials'})
@@ -28,10 +29,12 @@ const newUser=async(req,res)=>{
         const {name,username,password,bio} = req.body
         // console.log(req.body)
         const file=req.file
-        if(!file) return next(new ErrorHandler('Please uplaoda file file',11000))
+        if(!file) return next(new ErrorHandler('Please uplaoda file',11000))
+
+        const result=await uploadFilesToCloudinary([file])
         const avatar={
-            public_id:'sdfsd',
-            url:'asdfd'
+            public_id:result[0].public_id,
+            url:result[0].url,
         }
         const user=await User.create({
             name,
@@ -43,7 +46,7 @@ const newUser=async(req,res)=>{
     
         sendToken(res,user,200,'User Created Successfully')
     } catch (error) {
-        console.log(error)
+        console.log("New User error ",error)
     }
 }
 
@@ -65,20 +68,21 @@ const logout=async(req,res)=>{
 }
 
 const searchUser=async(req,res)=>{
-    const {name=""}=req.query  //req.query.name
-
-    // finding all my chats
-    const myChats=await Chat.find({groupChat:false,members:req.user})
+    //same as req.query.name
+    const {name=""}=req.query  //If name is not present in req.query, it defaults to an empty string ("").
+    
+    // finding all my connections
+    const myChats=await Chat.find({groupChat:false,members:req.user})  // getting req.user from isAuthenticated
     const allUsersFromMyChats=myChats.flatMap((chat)=>chat.members)  // chat.members is an array itself
 
-    // $regex is built-in property in mongoose. So suppose if name is Saunak and userr search sau -> it will return user with name saunak and options "i" for case insensitive
+    // $regex is built-in property in mongoose. So suppose if name is Saunak and user search sau -> it will return user with name saunak and options "i" for case insensitive
     const allUsersExceptMeandFriends=await User.find({
         _id:{$nin:allUsersFromMyChats},
         name:{$regex:name,$options:"i"}  
     })
-
+    // console.log("unknown peoples",allUsersExceptMeandFriends)
     // avatar.url can be done from frontend also but we did it from here
-    //modifying the response
+    //modifying the response 
     const users=allUsersExceptMeandFriends.map(({_id,name,avatar})=>({_id,name,avatar:avatar.url}))
     return res.status(200).json({success:true,users})
 }
@@ -101,17 +105,25 @@ const sendFrndReq=async(req,res,next)=>{
     return res.status(200).json({success:true,message:'Friend Request Sent'})
 }
 
+// req.user comming from isAuthenticated
 const acceptFrndReq=async(req,res,next)=>{
     const {requestId,accept}=req.body
+
+    // Mongoose fetches only:
+    // name (because you specified it)
+    // _id (because it's included by default)
+    // But it does NOT fetch other fields like email, age, etc.
     const request=await Request.findById(requestId).populate("sender","name").populate("receiver","name")
-    console.log(request)
+
     if(!request) return next(new ErrorHandler('Friend Request not found',404))
     if(request.receiver._id.toString()!==req.user.toString()) return next(new ErrorHandler('You are not authorized',401))
     
+        // rejected
     if(!accept){
         await request.deleteOne()
         return res.status(200).json({success:true,message:'Request canceled'})
     }
+    //accepted
     const members=[request.sender._id,request.receiver._id]
     await Promise.all([
         Chat.create({
@@ -126,8 +138,8 @@ const acceptFrndReq=async(req,res,next)=>{
 
 const getMyNotifications=async(req,res)=>{
     const request=await Request.find({receiver:req.user}).populate("sender","name avatar")
-    console.log(request)
-    const all_requests=await request.map(({_id,sender})=>({
+    // console.log(request)
+    const all_requests= request.map(({_id,sender})=>({
         _id,
         sender:{
             _id:sender._id,

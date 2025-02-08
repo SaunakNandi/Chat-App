@@ -17,10 +17,10 @@ const createUser=async(numUsers)=>{
             }))
         }
         await Promise.all(usersPromise)
-        console.log("Users created ",numUsers)
+        // console.log("Users created ",numUsers)
         process.exit(1); // for closing the server
     } catch (error) {
-        console.error(error)
+        console.error("error in create user ",error)
         process.exit(1)
     }
 }

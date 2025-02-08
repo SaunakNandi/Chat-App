@@ -13,6 +13,10 @@ import { NEW_MESSAGE, NEW_MESSAGE_ALERT } from './constants/events.js'
 import {v4 as uuid} from 'uuid'
 import { getSockets } from './lib/helper.lib.js'
 import { Message } from './models/message.models.js'
+import cors from 'cors'
+import {v2 as cloudinary} from 'cloudinary'
+import { corsOptions } from './constants/config.js'
+import { socketAuthenticator } from './middlewares/auth.js'
 // import { createSingleChat,createGroupChat, createMessages, createMessagesInAChat } from './seeders/chat.js'
 // import { createUser } from './seeders/user.js'
 
@@ -22,34 +26,46 @@ dotenv.config({
 
 export const envMode=process.env.NODE_ENV.trim() || "PRODUCTION"
 connectDB(process.env.MONGO_URL)
+cloudinary.config({
+    cloud_name:process.env.CLOUDINARY_CLOUD_NAME,
+    api_key:process.env.CLOUDINARY_API_KEY,
+    api_secret:process.env.CLOUDINARY_API_SECRET
+})
 // createUser(10)
 // createSingleChat(10)
 // createGroupChat(10)
 // createMessagesInAChat('67961e683b1bab4d77ac2dc3',50) // rerum argulo
 const app=express()
 const server=createServer(app);
-const io=new Server(server,{})
-const userSocketIDs=new Map()   // it contains all the users connected to the socket
+const io=new Server(server,{cors:corsOptions})
+const userSocketIDs=new Map()   // it will contains all the users connected to the socket
 
+app.use(cors(corsOptions))
+// app.use(cors())
 app.use(cookieParser())
 app.use(express.json())  // to access the json data from request body
-// app.use(express.urlencoded())  // to access the form data from request body
+app.use(express.urlencoded({extended:true}))  // to access the form data from request body
 
-app.use('/user',userRoute)
-app.use('/chat',chatRoute)
+app.use('/api/v1/user',userRoute)
+app.use('/api/v1/chat',chatRoute)
 
 //middleware
+// to make sure only authenticated users are allowed to connect to the server
 io.use((socket,next)=>{
-    // alternate method handsake
+    console.log("socket here")
+    cookieParser()(socket.request,socket.request.res,async(err)=>{
+        // console.log("is socketAuthenticator running")
+        await socketAuthenticator(err,socket,next)
+    })
 })
+
+
 io.on('connection',(socket)=>{
     console.log('User connected')
-    const user={
-        _id:'asdada',
-        name:'user'
-    }
+    const user=socket.user
     userSocketIDs.set(user._id.toString(),socket.id)  // keeping track of the user._id connected to the socket.id
-    console.log(userSocketIDs)
+    console.log("userSocketIDs ",userSocketIDs)
+    // getting {chatId,members,message} from frontend(check pages/Chat.jsx)
     socket.on(NEW_MESSAGE,async({chatId,members,message})=>{
         const messageForRealTime={
             content:message,
@@ -66,8 +82,12 @@ io.on('connection',(socket)=>{
             sender:user._id,
             chat:chatId,
         }
-        // sending all the members received from frontend
-        const membersSocket=getSockets(members)  // contain id's of members
+        // members contains array of user ids
+        const membersSocket=getSockets(members)  // contain socket id's of each member
+        console.log("Emitting ",messageForRealTime)  
+        console.log("Members: ",members)
+
+        // io.to() This tells Socket.IO to send a message only to the specified socket IDs.
         io.to(membersSocket).emit(NEW_MESSAGE,{
             chatId,
             message:messageForRealTime
@@ -77,9 +97,8 @@ io.on('connection',(socket)=>{
         try {
             await Message.create(messageForDB)
         } catch (error) {
-            console.error(error)
+            console.error("Error in creating error ",error.message)
         }
-        console.log(NEW_MESSAGE,messageForRealTime) 
     })
     socket.on('disconnect',()=>{
         console.log('User disconnected')
@@ -87,7 +106,7 @@ io.on('connection',(socket)=>{
     })
 })
 
-app.use(errorMiddleware)  // this will be the middleware to handle the errors
+// app.use(errorMiddleware)  // this will be the middleware to handle the errors
 
 
 server.listen(3000,()=>{

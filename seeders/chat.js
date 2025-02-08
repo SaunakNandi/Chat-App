@@ -92,7 +92,7 @@ const createMessagesInAChat=async(chatId,numMessages)=>{
         console.log("Messages created in chat",chatId)
         process.exit()
     } catch (error) {
-        console.log(error)
+        console.log("Create Message Error",error)
     }
 }
 export {createSingleChat,createGroupChat,createMessages,createMessagesInAChat}
