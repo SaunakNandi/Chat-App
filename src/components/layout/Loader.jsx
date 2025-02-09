@@ -3,7 +3,7 @@ import Grid from '@mui/material/Grid2'
 import { Skeleton } from '@mui/material'
 
 const Loader = () => {
-    console.log("Loading got called...")
+    // console.log("Loading got called...")
   return (
     <Grid container sx={{
         height: "calc(100vh - 3.5rem)", // Use sx for styles

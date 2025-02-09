@@ -35,6 +35,7 @@ const api=createApi({
             providesTags:["User"]
         }),
 
+        // mutation for POST, PUT, DELETE
         sendFriendRequest:builder.mutation({
             query:(data)=>({
                 url:"/user/send-req",
@@ -42,7 +43,8 @@ const api=createApi({
                 credentials:"include",
                 body:data,
             }),
-            invalidatesTags:["User"]
+            invalidatesTags:["User"]  // Marks "Chat" data as stale, refetches next time
+            // In RTK Query, stale data means cached data that is no longer considered up-to-date and needs to be refetched from the server.
         }),
 
         acceptFriendRequest:builder.mutation({
@@ -61,7 +63,21 @@ const api=createApi({
                 credentials:"include"
             }),
             keepUnusedDataFor:0  // no caching
-        })
+        }),
+
+        chatDetails:builder.query({
+
+            // u can find populate in getChatDetails(in server) also
+            query:({chatId,populate=false})=>{
+                let url=`chat/${chatId}`
+                if(populate) url+="?populate=true"
+                return {
+                    url,
+                    credentials:"include"
+                }
+            },
+            providesTags:["Chat"]  // for caching
+        }),
     })
 })
 
@@ -70,4 +86,4 @@ console.log(api.endpoints?.acceptFriendRequest) // to about the hooks created fo
 
 export default api
 export const {useMyChatsQuery,useLazySearchUserQuery,useSendFriendRequestMutation,useGetNotificationsQuery,
-    useAcceptFriendRequestMutation}=api
+    useAcceptFriendRequestMutation,useChatDetailsQuery}=api

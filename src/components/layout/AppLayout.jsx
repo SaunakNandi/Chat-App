@@ -17,6 +17,7 @@ import { getSocket } from '../../socket'
 const AppLayout = () =>(WrappedComponent)=> {
   return (props)=>{
     const socket=getSocket()
+    console.log(socket.id)
     const params=useParams()
     const chatId=params.chatId
     const dispatch=useDispatch()
@@ -44,10 +45,12 @@ const AppLayout = () =>(WrappedComponent)=> {
     return(
         <>
             <Title/>
-            <Header/>
 
+            {/* Navbar */}
+            <Header/>
             {
                 isLoading?<Skeleton/>:(
+                    // Hamburger/Menubar icon
                     <Drawer open={isMobile} onClose={handleMobileClose}>
                         <ChatList w="70vw" chats={data?.chats} chatId={chatId} handleDeleteChat={handleDeleteChat}/>
                     </Drawer>
@@ -74,7 +77,8 @@ const AppLayout = () =>(WrappedComponent)=> {
                         bgcolor: "aliceblue",
                     }}
                 >
-                    <WrappedComponent {...props} />
+                    {/* Chat component can be accessed from this WrappedComponent */}
+                    <WrappedComponent {...props} chatId={chatId}/>
                 </Grid>
 
                 <Grid item md={4} lg={3} size={{ md: 4, lg:3 }} sx={{
