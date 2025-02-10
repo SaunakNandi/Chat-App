@@ -10,6 +10,7 @@ import { useDispatch,useSelector } from 'react-redux'
 import { userNotExists } from '../../redux/reducers/auth'
 import toast from 'react-hot-toast'
 import { setIsMobile, setIsNotification, setIsSearch } from '../../redux/reducers/misc'
+import { resetNotifications } from '../../redux/reducers/chat'
 
 const SearchBox=lazy(()=> import('../specific/SearchBox'))
 const NotificationBell=lazy(()=> import('../specific/NotificationsBell'))
@@ -20,6 +21,7 @@ const Header = () => {
     const navigate=useNavigate()
     const dispatch=useDispatch()
     const {isSearch,isNotification}=useSelector(state=>state.misc)
+    const {notificationCount}=useSelector(state=>state.misc)
     const [isNewGroup,setIsNewGroup]=useState(false)
 
     const handleMobile=()=>{
@@ -33,7 +35,10 @@ const Header = () => {
     }
     const navigateGroup=()=>{
         navigate('/groups')
-
+    }
+    const openNotification=()=>{
+        dispatch(setIsNotification(true))
+        dispatch(resetNotifications())
     }
     const logoutHandler=async()=>{
         // Logout logic here
@@ -48,9 +53,6 @@ const Header = () => {
             console.error(error)
             toast.error(error?.response?.data?.message || "Something went wrong")
         }
-    }
-    const openNotification=()=>{
-        dispatch(setIsNotification(true))
     }
   return (
     <>
@@ -72,7 +74,7 @@ const Header = () => {
                         <IconBtn title={"Search"} icon={<SearchIcon/>} func={openSearch}></IconBtn>
                         <IconBtn title={"New Group"} icon={<AddIcon/>} func={openNewGroup}></IconBtn>
                         <IconBtn title={"Manage Groups"} icon={<GroupIcon/>} func={navigateGroup}></IconBtn>
-                        <IconBtn title={"Notifications"} icon={<NotificationsIcon/>} func={openNotification}></IconBtn>
+                        <IconBtn title={"Notifications"} icon={<NotificationsIcon/>} func={openNotification} value={notificationCount}/>
                         <IconBtn title={"Logout"} icon={<LogoutIcon/>} func={logoutHandler}></IconBtn>
                     </Box>
                 </Toolbar>

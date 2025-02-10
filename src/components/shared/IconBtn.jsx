@@ -1,9 +1,12 @@
-import { Tooltip,IconButton } from "@mui/material"
-export const IconBtn=({title,icon,func})=>{
+import { Tooltip,IconButton, Badge } from "@mui/material"
+export const IconBtn=({title,icon,func,value})=>{
     return (
         <Tooltip title={title}>
             <IconButton color='inherit' size='large' onClick={func}>
-                {icon}
+                {
+                    value? <Badge badgeContent={value} color="error">icon</Badge>:icon
+                }
+                
             </IconButton>
         </Tooltip>
     )

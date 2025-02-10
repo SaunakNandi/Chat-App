@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react'
+import React, { useCallback, useEffect } from 'react'
 import Header from './Header'
 import Title from '../shared/Title'
 import Grid from '@mui/material/Grid2'
@@ -12,7 +12,9 @@ import { useDispatch, useSelector } from 'react-redux'
 import { setIsMobile } from '../../redux/reducers/misc'
 import { useErrors } from '../../hooks/hook'
 import { getSocket } from '../../socket'
-
+import { NEW_REQUEST, NEW_MESSAGE_ALERT } from '../../constants/events'
+import { incrementNotifications } from '../../redux/reducers/chat'
+import { useSocketEvents } from '../../hooks/hook'
 // HOC
 const AppLayout = () =>(WrappedComponent)=> {
   return (props)=>{
@@ -41,6 +43,16 @@ const AppLayout = () =>(WrappedComponent)=> {
         e.preventDefault()
         console.log("Deleting chat", _id)
     }
+    const newMessageAlertHandler=useCallback(()=>{},[])
+    const newRequestHandler=useCallback(()=>{
+        dispatch(incrementNotifications())
+    },[])
+    const eventHandlers={
+        [NEW_MESSAGE_ALERT]:newMessageAlertHandler,
+        [NEW_REQUEST]:newRequestHandler
+    }   
+      
+    useSocketEvents(socket,eventHandlers)
     
     return(
         <>
@@ -78,7 +90,8 @@ const AppLayout = () =>(WrappedComponent)=> {
                     }}
                 >
                     {/* Chat component can be accessed from this WrappedComponent */}
-                    <WrappedComponent {...props} chatId={chatId}/>
+                    {console.log({...props})}
+                    <WrappedComponent {...props} chatId={chatId} user={user}/>
                 </Grid>
 
                 <Grid item md={4} lg={3} size={{ md: 4, lg:3 }} sx={{

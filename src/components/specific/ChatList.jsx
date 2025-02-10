@@ -20,11 +20,11 @@ export const ChatList = ({w="100%",chats=[],chatId,onlineUsers=[],
                 
                 const isOnline=onlineUsers.includes(_id)
                 // const isOnline=members?.some((member)=>onlineUsers.includes(_id))
-                return <ChatItem newMessageAlert={newMessageAlert} isOnline={isOnline} avatar={avatar}
+                return (<ChatItem newMessageAlert={newMessageAlert} isOnline={isOnline} avatar={avatar}
                 name={name} _id={_id} key={_id} groupChat={groupChat}
                 sameSender={chatId===_id}
                 handleDeleteChat={handleDeleteChat}
-                index={index}/>
+                index={index}/>)
             })
         }
     </Stack>

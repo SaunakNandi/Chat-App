@@ -11,7 +11,7 @@ const api=createApi({
     baseQuery:fetchBaseQuery({
         baseUrl:`${server}/api/v1/`,
     }),
-    tagTypes:["Chat","User"],
+    tagTypes:["Chat","User","Message"],
     endpoints:(builder)=>({
         // query for get requests
         myChats:builder.query({
@@ -38,7 +38,7 @@ const api=createApi({
         // mutation for POST, PUT, DELETE
         sendFriendRequest:builder.mutation({
             query:(data)=>({
-                url:"/user/send-req",
+                url:"user/send-req",
                 method:"Put",
                 credentials:"include",
                 body:data,
@@ -49,7 +49,7 @@ const api=createApi({
 
         acceptFriendRequest:builder.mutation({
             query:(data)=>({
-                url:"/user/accept-req",
+                url:"user/accept-req",
                 method:"PUT",
                 credentials:"include",
                 body:data,
@@ -78,6 +78,23 @@ const api=createApi({
             },
             providesTags:["Chat"]  // for caching
         }),
+
+        getMessages:builder.query({
+            query:({chatId,page})=>({
+                url:`chat/message/${chatId}?page=${page}`,
+                credentials:"include"
+            }),
+            providesTags:["Message"]  // for caching
+        }),
+
+        sendAttachments:builder.mutation({
+            query:(data)=>({
+                url:'chat/message',
+                method:'POST',
+                credentials:"include",
+                body:data,
+            })
+        })
     })
 })
 
@@ -86,4 +103,4 @@ console.log(api.endpoints?.acceptFriendRequest) // to about the hooks created fo
 
 export default api
 export const {useMyChatsQuery,useLazySearchUserQuery,useSendFriendRequestMutation,useGetNotificationsQuery,
-    useAcceptFriendRequestMutation,useChatDetailsQuery}=api
+    useAcceptFriendRequestMutation,useChatDetailsQuery,useGetMessagesQuery, useSendAttachmentsMutation}=api

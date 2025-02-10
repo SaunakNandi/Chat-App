@@ -2,12 +2,13 @@ import { configureStore } from "@reduxjs/toolkit";
 import authSlice from "./reducers/auth";
 import api from "./api/api";
 import miscSlice from "./reducers/misc";
+import chatSlice from "./reducers/chat";
 
 const store=configureStore({
     reducer:{
         [authSlice.name]:authSlice.reducer,  // whatever be the name of authSlice it can be accessed  by authSlice.name
         [miscSlice.name]:miscSlice.reducer,
-
+        [chatSlice.name]:chatSlice.reducer,
         // api.reducerPath is set as 'api', so this adds RTK Query’s reducer to the Redux store under the key api.
         // This stores API responses (caching, request states, etc.) in Redux.
         [api.reducerPath]:api.reducer
