@@ -38,6 +38,7 @@ cloudinary.config({
 const app=express()
 const server=createServer(app);
 const io=new Server(server,{cors:corsOptions})
+app.set('io',io)
 const userSocketIDs=new Map()   // it will contains all the users connected to the socket
 
 app.use(cors(corsOptions))
@@ -59,7 +60,7 @@ io.use((socket,next)=>{
     })
 })
 
-
+// waiting for the event to get fired from socket.jsx in client side
 io.on('connection',(socket)=>{
     console.log('User connected')
     const user=socket.user
@@ -84,8 +85,8 @@ io.on('connection',(socket)=>{
         }
         // members contains array of user ids
         const membersSocket=getSockets(members)  // contain socket id's of each member
-        console.log("Emitting ",messageForRealTime)  
-        console.log("Members: ",members)
+        // console.log("Emitting ",messageForRealTime)  
+        // console.log("Members: ",members)
 
         // io.to() This tells Socket.IO to send a message only to the specified socket IDs.
         io.to(membersSocket).emit(NEW_MESSAGE,{

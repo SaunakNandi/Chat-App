@@ -6,4 +6,4 @@ const multerUpload=multer({limits:{fileSize:1024*1024*100}}) //100mb
 export const singleAvatar=multerUpload.single("avatar")
 
 // file upload
-export const attachments=multerUpload.array('files',6)
+export const attachmentsMulter=multerUpload.array('files',6)

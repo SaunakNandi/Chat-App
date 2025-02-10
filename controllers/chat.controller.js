@@ -2,10 +2,10 @@ import { ErrorHandler } from "../utils/utility.js"
 import {Chat} from '../models/chat.models.js'
 import {User} from '../models/user.models.js'
 import {Message} from '../models/message.models.js'
-import { deleteFilesFromCloudinary, emitEvent } from "../utils/features.js"
-import { ALERT, NEW_ATTACHMENT, NEW_MESSAGE_ALERT, REFETCH_CHATS } from "../constants/events.js"
+import { deleteFilesFromCloudinary, emitEvent, uploadFilesToCloudinary } from "../utils/features.js"
+import { ALERT, NEW_ATTACHMENT, NEW_MESSAGE, NEW_MESSAGE_ALERT, REFETCH_CHATS } from "../constants/events.js"
 import { getOtherMember } from "../lib/helper.lib.js"
-import { attachments } from "../middlewares/multer.js"
+import { attachmentsMulter } from "../middlewares/multer.js"
 
 const newGroupChat=async(req,res,next)=>{
     const {name,members}=req.body
@@ -159,7 +159,7 @@ const sendAttachment = async function(req,res,next){
     if(files.length<1) return next(new ErrorHandler('No file uploaded',400))
     if(files.length>5) return next(new ErrorHandler(`Files can't be more than 4`,400))
     // upload files
-    const attachments=[]
+    const attachments=await uploadFilesToCloudinary(files)
     const messageForDB={content:"",attachments,sender:me._id,chat:chatId}
     const messageForRealTime={
         ...messageForDB,
@@ -169,7 +169,7 @@ const sendAttachment = async function(req,res,next){
         },
     }
     const message=await Message.create(messageForDB)
-    emitEvent(req,NEW_ATTACHMENT,chat.members,{
+    emitEvent(req,NEW_MESSAGE,chat.members,{
         message:messageForRealTime,
         chatId
     })
@@ -186,13 +186,14 @@ const getChatDetails = async function(req,res,next){
         {
             const chat=await Chat.findById(req.params.id).populate('members','name avatar').lean()
             // we dont want to alter the chat.members in database so we will not save but we still need to save the chat.members so we can use .lean()
-
-            // Now chat will not be a mongoose object else it will be a plain javascript object
+            console.log("chat members",chat.members)
+            // Now chat will not be a mongoose object i.e it will be a plain javascript object
             chat.members=chat.members.map(({_id,name,avatar})=>({
                 _id,
                 name,
                 avatar:avatar.url
             }))
+            console.log("chat members after",chat.members)
             return res.status(201).json({
                 sucess:true,
                 chat
