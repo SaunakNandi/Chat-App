@@ -13,6 +13,7 @@ import { useErrors, useSocketEvents } from '../hooks/hook.jsx'
 import { useInfiniteScrollTop } from '6pp'
 import { useDispatch } from 'react-redux'
 import { setIsFileMenu } from '../redux/reducers/misc.js'
+import { removeNewMessagesAlert } from '../redux/reducers/chat.js'
 
 
 // See the return statement to understand how Chat is getting called and chatId is comming
@@ -43,7 +44,7 @@ const Chat = ({chatId,user}) => {
     {isError:chatDetails.isError,error:chatDetails.error},
     {isError:oldMessagesChunk.isError,error:oldMessagesChunk.error}
   ]
-  console.log("oldmessages",oldMessages)
+  // console.log("oldmessages",oldMessages)
   // console.log(messages)
   // user is me
   
@@ -57,6 +58,7 @@ const Chat = ({chatId,user}) => {
   }
 
   useEffect(()=>{
+    dispatch(removeNewMessagesAlert(chatId))
     // when the chatId changes it trigger the useEffect and before the useEffect do its work the return statement is executed
     return()=>{
       setMessages([])
@@ -70,7 +72,7 @@ const Chat = ({chatId,user}) => {
      console.log(data)  
      if(data.chatId !== chatId) return
     setMessages(prev=>[...prev,data.message])
-  },[])
+  },[chatId])
   
   // [NEW_MESSAGE] is a dynammic variable, writting in this way means {'NEW_MESSAGE':newMessageHandler}
   const eventHandlerArr={[NEW_MESSAGE]:newMessagesHandler}   

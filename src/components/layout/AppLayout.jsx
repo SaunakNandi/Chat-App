@@ -13,8 +13,9 @@ import { setIsMobile } from '../../redux/reducers/misc'
 import { useErrors } from '../../hooks/hook'
 import { getSocket } from '../../socket'
 import { NEW_REQUEST, NEW_MESSAGE_ALERT } from '../../constants/events'
-import { incrementNotifications } from '../../redux/reducers/chat'
+import { incrementNotifications, setNewMessagesAlert } from '../../redux/reducers/chat'
 import { useSocketEvents } from '../../hooks/hook'
+import { getOrSaveFromStorage } from '../lib/Feature.js'
 // HOC
 const AppLayout = () =>(WrappedComponent)=> {
   return (props)=>{
@@ -23,6 +24,9 @@ const AppLayout = () =>(WrappedComponent)=> {
     const params=useParams()
     const chatId=params.chatId
     const dispatch=useDispatch()
+    const {isMobile}=useSelector((state)=>state.misc)
+    const {user}=useSelector((state)=>state.auth)
+    const {newMessagesAlert}=useSelector((state)=>state.chat)
     // useMyChatsQuery returns an object that includes data.
     // {
     //     data,         // The fetched chat data (or undefined if still loading)
@@ -34,8 +38,14 @@ const AppLayout = () =>(WrappedComponent)=> {
     console.log(data)
     
     useErrors([{error,isError}])
-    const {isMobile}=useSelector((state)=>state.misc)
-    const {user}=useSelector((state)=>state.auth)
+
+    useEffect(()=>{
+        // when we loads the page, in the localStorage newMessagesAlert get reset =>{chatId: "", count: 0}
+        // to solve this we will change the initilization of newMessagesAlert in chat.js
+        getOrSaveFromStorage({key:NEW_MESSAGE_ALERT,value:newMessagesAlert})
+    },[newMessagesAlert])
+
+    console.log("newMessagesAlert ",newMessagesAlert)
     const handleMobileClose=()=>{
         dispatch(setIsMobile(false))
     }
@@ -43,7 +53,11 @@ const AppLayout = () =>(WrappedComponent)=> {
         e.preventDefault()
         console.log("Deleting chat", _id)
     }
-    const newMessageAlertHandler=useCallback(()=>{},[])
+    const newMessageAlertHandler=useCallback((data)=>{
+        if(data.chatId==chatId) return
+        dispatch(setNewMessagesAlert(data))
+    },[chatId])
+
     const newRequestHandler=useCallback(()=>{
         dispatch(incrementNotifications())
     },[])
@@ -64,7 +78,8 @@ const AppLayout = () =>(WrappedComponent)=> {
                 isLoading?<Skeleton/>:(
                     // Hamburger/Menubar icon
                     <Drawer open={isMobile} onClose={handleMobileClose}>
-                        <ChatList w="70vw" chats={data?.chats} chatId={chatId} handleDeleteChat={handleDeleteChat}/>
+                        <ChatList w="70vw" chats={data?.chats} chatId={chatId} handleDeleteChat={handleDeleteChat}
+                        newMessagesAlert={newMessagesAlert}/>
                     </Drawer>
                 )
             }
@@ -80,7 +95,8 @@ const AppLayout = () =>(WrappedComponent)=> {
                     }}>
                     {
                         isLoading? (<Skeleton/>):
-                        (<ChatList chats={data?.chats} chatId={chatId} handleDeleteChat={handleDeleteChat}/>)
+                        (<ChatList chats={data?.chats} chatId={chatId} handleDeleteChat={handleDeleteChat}
+                            newMessagesAlert={newMessagesAlert}/>)
                     }
                 </Grid>
 

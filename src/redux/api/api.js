@@ -79,12 +79,13 @@ const api=createApi({
             providesTags:["Chat"]  // for caching
         }),
 
+        // keepUnusedDataFor:0 to solve the issue: If I text you, you will get the message. But if you go to some another chat and then come to my chat my latest text will not be present. If you have reload the page again to view the message. 
         getMessages:builder.query({
             query:({chatId,page})=>({
                 url:`chat/message/${chatId}?page=${page}`,
                 credentials:"include"
             }),
-            providesTags:["Message"]  // for caching
+            keepUnusedDataFor:0
         }),
 
         sendAttachments:builder.mutation({

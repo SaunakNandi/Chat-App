@@ -5,6 +5,7 @@ import AvatarCard from './AvatarCard'
 
 const ChatItem = ({avatar=[],name,_id,groupChat=false,lastMsg,
     sameSender,isOnline,newMessageAlert,index=0,handleDeleteChat}) => {
+        // console.log(newMessageAlert)
   return (
     <Link to={`/chat/${_id}`} onContextMenu={(e)=>handleDeleteChat(e,_id,groupChat)}
     sx={{
