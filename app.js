@@ -9,7 +9,7 @@ import { errorMiddleware } from './middlewares/error.js'
 import cookieParser from 'cookie-parser'
 import { Server } from 'socket.io'
 import {createServer} from 'http'
-import { NEW_MESSAGE, NEW_MESSAGE_ALERT } from './constants/events.js'
+import { NEW_MESSAGE, NEW_MESSAGE_ALERT, START_TYPING } from './constants/events.js'
 import {v4 as uuid} from 'uuid'
 import { getSockets } from './lib/helper.lib.js'
 import { Message } from './models/message.models.js'
@@ -53,7 +53,7 @@ app.use('/api/v1/chat',chatRoute)
 //middleware
 // to make sure only authenticated users are allowed to connect to the server
 io.use((socket,next)=>{
-    console.log("socket here")
+    // console.log("socket here")
     cookieParser()(socket.request,socket.request.res,async(err)=>{
         // console.log("is socketAuthenticator running")
         await socketAuthenticator(err,socket,next)
@@ -62,10 +62,10 @@ io.use((socket,next)=>{
 
 // waiting for the event to get fired from socket.jsx in client side
 io.on('connection',(socket)=>{
-    console.log('User connected')
+    // console.log('User connected')
     const user=socket.user
     userSocketIDs.set(user._id.toString(),socket.id)  // keeping track of the user._id connected to the socket.id
-    console.log("userSocketIDs ",userSocketIDs)
+    // console.log("userSocketIDs ",userSocketIDs)
     // getting {chatId,members,message} from frontend(check pages/Chat.jsx)
     socket.on(NEW_MESSAGE,async({chatId,members,message})=>{
         const messageForRealTime={
@@ -101,6 +101,12 @@ io.on('connection',(socket)=>{
             console.error("Error in creating error ",error.message)
         }
     })
+    socket.on(START_TYPING,({members,chatId})=>{
+        console.log("typing ",members,chatId)
+        const membersSockets=getSockets(members)
+        socket.to(membersSockets).emit(START_TYPING,{chatId})
+    })
+
     socket.on('disconnect',()=>{
         console.log('User disconnected')
         userSocketIDs.delete(user._id.toString())
