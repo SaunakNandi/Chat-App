@@ -21,7 +21,7 @@ const Header = () => {
     const navigate=useNavigate()
     const dispatch=useDispatch()
     const {isSearch,isNotification}=useSelector(state=>state.misc)
-    const {notificationCount}=useSelector(state=>state.misc)
+    const {notificationCount}=useSelector(state=>state.chat)
     const [isNewGroup,setIsNewGroup]=useState(false)
 
     const handleMobile=()=>{
