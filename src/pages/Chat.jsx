@@ -7,7 +7,7 @@ import { InputBox } from '../components/styles/StyledComponent'
 import { FileMenu } from '../components/FileMenu'
 import MessageComponent from '../components/shared/MessageComponent'
 import { getSocket } from '../socket'
-import { NEW_MESSAGE, START_TYPING, STOP_TYPING } from '../constants/events'
+import { ALERT, NEW_MESSAGE, START_TYPING, STOP_TYPING } from '../constants/events'
 import { useChatDetailsQuery, useGetMessagesQuery } from '../redux/api/api.js'
 import { useErrors, useSocketEvents } from '../hooks/hook.jsx'
 import { useInfiniteScrollTop } from '6pp'
@@ -112,8 +112,21 @@ const Chat = ({chatId,user}) => {
     // console.log("Stopping ",data)
   },[chatId])
   
+  const alertListner=useCallback((content)=>{
+    const messageForAlert={
+      content,
+      sender:{
+          _id:"hiuwebfiuabufp2983ryhqh1",
+          name:"Admin"
+      },
+      chat:chatId,
+      createdAt:new Date().toISOString(),
+    }
+    setMessages((prev)=>[...prev,messageForAlert])
+  },[chatId])
   // [NEW_MESSAGE] is a dynammic variable, writting in this way means {'NEW_MESSAGE':newMessageHandler}
   const eventHandlerArr={
+    [ALERT]:alertListner,
     [NEW_MESSAGE]:newMessagesListner,
     [START_TYPING]:startTypingListner,
     [STOP_TYPING]:stopTypingListner

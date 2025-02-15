@@ -12,7 +12,7 @@ import { useDispatch, useSelector } from 'react-redux'
 import { setIsMobile } from '../../redux/reducers/misc'
 import { useErrors } from '../../hooks/hook'
 import { getSocket } from '../../socket'
-import { NEW_REQUEST, NEW_MESSAGE_ALERT } from '../../constants/events'
+import { NEW_REQUEST, NEW_MESSAGE_ALERT, REFETCH_CHATS } from '../../constants/events'
 import { incrementNotifications, setNewMessagesAlert } from '../../redux/reducers/chat'
 import { useSocketEvents } from '../../hooks/hook'
 import { getOrSaveFromStorage } from '../lib/Feature.js'
@@ -62,9 +62,13 @@ const AppLayout = () =>(WrappedComponent)=> {
         console.log("New message")
         dispatch(incrementNotifications())
     },[dispatch])
+    const refetchListener=useCallback(()=>{
+        refetch()
+    },[refetch])
     const eventHandlers={
         [NEW_MESSAGE_ALERT]:newMessageAlertHandler,
-        [NEW_REQUEST]:newRequestListener 
+        [NEW_REQUEST]:newRequestListener, 
+        [REFETCH_CHATS]:refetchListener 
     }   
       
     useSocketEvents(socket,eventHandlers)

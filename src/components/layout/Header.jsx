@@ -9,7 +9,7 @@ import axios from 'axios'
 import { useDispatch,useSelector } from 'react-redux'
 import { userNotExists } from '../../redux/reducers/auth'
 import toast from 'react-hot-toast'
-import { setIsMobile, setIsNotification, setIsSearch } from '../../redux/reducers/misc'
+import { setIsMobile, setIsNewGroup, setIsNotification, setIsSearch } from '../../redux/reducers/misc'
 import { resetNotifications } from '../../redux/reducers/chat'
 
 const SearchBox=lazy(()=> import('../specific/SearchBox'))
@@ -20,9 +20,8 @@ const Header = () => {
   const server=import.meta.env.VITE_SERVER
     const navigate=useNavigate()
     const dispatch=useDispatch()
-    const {isSearch,isNotification}=useSelector(state=>state.misc)
+    const {isSearch,isNotification,isNewGroup}=useSelector(state=>state.misc)
     const {notificationCount}=useSelector(state=>state.chat)
-    const [isNewGroup,setIsNewGroup]=useState(false)
 
     const handleMobile=()=>{
         dispatch(setIsMobile(true))
@@ -31,7 +30,7 @@ const Header = () => {
         dispatch(setIsSearch(true))
     }
     const openNewGroup=()=>{
-        setIsNewGroup(prev=>!prev)
+        dispatch(setIsNewGroup(true))
     }
     const navigateGroup=()=>{
         navigate('/groups')

@@ -27,7 +27,7 @@ export const useAsyncMutation=(mutationHook)=>{
               if(res.data)
               {
                 // {id:toastId} this will remove the loading toast
-                toast.success(res.data.message || "Updating data successfully",{id:toastId})
+                toast.success(res.data.message || `${toastMessage} successfully`,{id:toastId})
                 // console.log(res.data)
                 setData(res.data)
               }

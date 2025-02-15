@@ -8,13 +8,45 @@ import AvatarCard from '../components/shared/AvatarCard'
 import { samplechats, sampleUsers } from '../constants/sample_data'
 import AddMemberDialog from '../components/AddMemberDialog'
 import UserItem from '../components/shared/UserItem'
+import { useChatDetailsQuery, useMyGroupsQuery, useRenameGroupMutation } from '../redux/api/api'
+import { Loader } from '../components/layout/Loader'
+import { useAsyncMutation, useErrors } from '../hooks/hook'
 
 const ConfirmDeleteDialog=lazy(()=>import('../components/ConfirmDeleteDialog'))
 const Groups = () => {
   const navigate=useNavigate()
+  const [updateGroup,isLoadingGroupName]=useAsyncMutation(useRenameGroupMutation)
   const [isMobileMenuOpen,setIsMobileMenuOpen]=useState(true)
   const [isEdit,setIsEdit]=useState(false)
   const [confirmDeleteDialog,setConfirmDeleteDialog]=useState(false)
+  const [groupName,setGroupName]=useState('Group Name')
+  const [members,setMembers]=useState([])
+  const [groupNameUpdatedValue,setGroupNameUpdatedValue]=useState('')
+  const chatId=useSearchParams()[0].get('group')
+  const myGroups=useMyGroupsQuery("")
+  const groupDetails=useChatDetailsQuery({chatId,populate:true},{skip:!chatId}) // fetch only when chatId is there
+  // console.log(groupDetails?.data)
+  const errors=[
+    {
+      isError:myGroups.isError,
+      error:myGroups.error,
+    },
+    {
+      isError:groupDetails.isError,
+      error:groupDetails.error,
+    }
+  ]
+  useErrors(errors)
+
+  useEffect(()=>{
+    if(groupDetails.data)
+    {
+      setGroupName(groupDetails.data.chat.name)
+      setGroupNameUpdatedValue(groupDetails.data.chat.name)
+      setMembers(groupDetails.data.chat.members)
+    }
+  },[groupDetails.data])
+
   const handleMobile=()=>{
     setIsMobileMenuOpen(prev=>!prev)
   }
@@ -22,13 +54,11 @@ const Groups = () => {
     setIsMobileMenuOpen(false)
   }
   const isAddMember=false
-  const chatId=useSearchParams()[0].get('group')
-
-  const [groupName,setGroupName]=useState('Group Name')
-  const [groupNameUpdatedValue,setGroupNameUpdatedValue]=useState('')
 
   const updateGroupName=()=>{
     setIsEdit(false)
+    console.log()
+    updateGroup("Updating group name...",{chatId,name:groupNameUpdatedValue})
   }
   const openConfirmDelete=()=>{
     setConfirmDeleteDialog(true)
@@ -49,12 +79,6 @@ const Groups = () => {
     console.log('Remove',id)
   }
   useEffect(()=>{
-    if(chatId)
-    {
-      setGroupName(`Group Name ${chatId}`)
-      setGroupNameUpdatedValue(`Group Name ${chatId}`)
-    }
-
     return ()=>{
       setGroupNameUpdatedValue('')
       setGroupName('')
@@ -114,19 +138,20 @@ const Groups = () => {
           </>:
           <>
             <Typography>{groupName}</Typography>
-            <IconButton onClick={()=>setIsEdit(true)}><EditIcon/></IconButton>
+            <IconButton onClick={()=>setIsEdit(true)}
+              disabled={isLoadingGroupName}><EditIcon/></IconButton>
           </>
         }
       </Stack>
     )
-  return (
+  return myGroups.isLoading? <Loader/>: (
     <Grid container height={'100vh'}>
       <Grid size={{ sm:4 }} 
       sx={{display:{
         xs:'none',
         sm:'block'
       }}}>
-        <GroupsList myGroups={samplechats} chatId={chatId}/>
+        <GroupsList myGroups={myGroups?.data?.groups} chatId={chatId}/>
       </Grid>
       <Grid item xs={12} sm={8}
       sx={{
@@ -155,7 +180,7 @@ const Groups = () => {
 
               {
                 // In the UserItem isAdded passed as a prop is true by default. If you pass any props without declaring what it is, in the component side it will be a boolean value which will be true by default.
-                sampleUsers && sampleUsers.map((x, i) =>(
+                members && members.map((x, i) =>(
                   <UserItem user={x} key={X._id} isAdded handler={()=>removeMemberHandler(x._id)} 
                   styling={{
                     boxShadow: '0 0 0.5rem rgba(0,0,0,0.2)',
@@ -219,12 +244,13 @@ const GroupsList=({w="100%",myGroups=[],chatId})=>{
 }
 
 const GroupListItem=memo(({group,chatId})=>{
+  // console.log(group)
   const{name,avatar,_id}=group
   return (
   <Link to={`?group=${_id}`} onClick={(e)=>{
     if(chatId==_id) e.preventDefault();
   }}>
-    <Stack direction={'row'} spacing={'1rem'} alignItems={'center'} bgcolor={'blue'}>
+    <Stack direction={'row'} spacing={'1rem'} alignItems={'center'}>
       <AvatarCard avatar={avatar}/>
       <Typography>{name}</Typography>
     </Stack>

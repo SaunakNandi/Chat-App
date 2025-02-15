@@ -95,6 +95,42 @@ const api=createApi({
                 credentials:"include",
                 body:data,
             })
+        }),
+        myGroups:builder.query({
+            query:()=>({
+                url:'chat/my/groups',
+                credentials:"include"
+            }),
+            providesTags:["Chat"]  // for caching
+        }),
+        newGroup:builder.mutation({
+            query:({name,members})=>({
+                url:"chat/new",
+                method:"POST",
+                credentials:"include",
+                body:{name,members},
+            }),
+            invalidatesTags:["Chat"] // refetching to load chats for new added friend
+        }),
+        availableFriends:builder.query({
+            query:(chatId)=>{
+                let url=`user/friends`
+                if(chatId) url+=`?chatId=${chatId}`;
+                return{
+                    url,
+                    credentials:"include"
+                }
+            },
+            providesTags:["Chat"]  // for caching
+        }),
+        renameGroup:builder.mutation({
+            query:({chatId,name})=>({
+                url:`chat/${chatId}`,
+                method:"PUT",
+                credentials:"include",
+                body:{name},
+            }),
+            invalidatesTags:["Chat"] // refetching to load chats for new added friend
         })
     })
 })
@@ -104,4 +140,5 @@ console.log(api.endpoints?.acceptFriendRequest) // to about the hooks created fo
 
 export default api
 export const {useMyChatsQuery,useLazySearchUserQuery,useSendFriendRequestMutation,useGetNotificationsQuery,
-    useAcceptFriendRequestMutation,useChatDetailsQuery,useGetMessagesQuery, useSendAttachmentsMutation}=api
+    useAcceptFriendRequestMutation,useChatDetailsQuery,useGetMessagesQuery, useSendAttachmentsMutation, useMyGroupsQuery,useAvailableFriendsQuery,
+useNewGroupMutation,useRenameGroupMutation}=api
