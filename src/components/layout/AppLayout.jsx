@@ -45,7 +45,7 @@ const AppLayout = () =>(WrappedComponent)=> {
         getOrSaveFromStorage({key:NEW_MESSAGE_ALERT,value:newMessagesAlert})
     },[newMessagesAlert])
 
-    console.log("newMessagesAlert ",newMessagesAlert)
+    // console.log("newMessagesAlert ",newMessagesAlert)
     const handleMobileClose=()=>{
         dispatch(setIsMobile(false))
     }
@@ -58,12 +58,13 @@ const AppLayout = () =>(WrappedComponent)=> {
         dispatch(setNewMessagesAlert(data))
     },[chatId])
 
-    const newRequestHandler=useCallback(()=>{
+    const newRequestListener =useCallback(()=>{
+        console.log("New message")
         dispatch(incrementNotifications())
-    },[])
+    },[dispatch])
     const eventHandlers={
         [NEW_MESSAGE_ALERT]:newMessageAlertHandler,
-        [NEW_REQUEST]:newRequestHandler
+        [NEW_REQUEST]:newRequestListener 
     }   
       
     useSocketEvents(socket,eventHandlers)

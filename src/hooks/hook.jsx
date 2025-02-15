@@ -32,7 +32,7 @@ export const useAsyncMutation=(mutationHook)=>{
                 setData(res.data)
               }
               else{
-                toast.error(res.error?.data?.message || "Something went wrong",{id:toastId})
+                toast.error(res.error?.data?.message || "No data found",{id:toastId})
               }
             } catch (error) {
               console.log(error)
@@ -48,6 +48,7 @@ export const useAsyncMutation=(mutationHook)=>{
 export const useSocketEvents=(socket,handlers)=>{
     useEffect(()=>{
         Object.entries(handlers).forEach(([event,handler])=>{
+            // console.log(event,handler)
             socket.on(event,handler)
         })
 

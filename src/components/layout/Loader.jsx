@@ -1,6 +1,7 @@
 import React from 'react'
 import Grid from '@mui/material/Grid2'
-import { Skeleton } from '@mui/material'
+import { Skeleton, Stack } from '@mui/material'
+import { BouncingSkeleton } from '../styles/StyledComponent'
 
 const Loader = () => {
     // console.log("Loading got called...")
@@ -39,4 +40,31 @@ const Loader = () => {
   )
 }
 
-export default Loader
+const TypingLoader=()=>{
+    return (
+        <Stack
+        spacing={"0.5rem"}
+        direction={"row"}
+        padding={"0.5rem"}
+        justifyContent={"center"}>
+            <BouncingSkeleton variant='circular' width={15} height={15}
+            style={{
+                animationDelay:"0.1s"
+            }}/>
+            <BouncingSkeleton variant='circular' width={15} height={15}
+            style={{
+                animationDelay:"0.2s"
+            }}/>
+            <BouncingSkeleton variant='circular' width={15} height={15}
+            style={{
+                animationDelay:"0.4s"
+            }}/>
+            <BouncingSkeleton variant='circular' width={15} height={15}
+            style={{
+                animationDelay:"0.6s"
+            }}/>
+        </Stack>
+    )
+}
+
+export {Loader,TypingLoader}

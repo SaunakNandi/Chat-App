@@ -11,7 +11,7 @@ const SearchBox = () => {
   const search = useInputValidation('')
   const dispatch=useDispatch()
   const {isSearch}=useSelector((state)=>state.misc)
-
+  const [users,setUsers]=useState([])
   const [searchUser]=useLazySearchUserQuery()
   const [sendFrndReq,isLoadingSendFriendReq]=useAsyncMutation(useSendFriendRequestMutation)
   const addFriendHandler=async(id)=>{
@@ -25,17 +25,15 @@ const SearchBox = () => {
     const timeOutId=setTimeout(()=>{
       searchUser(search.value)
       .then(({data})=>{
-        console.log(data)
+        // console.log(data)
         setUsers(data.users)
-    })
-      .catch((e)=>console.error(e))
+    }).catch((e)=>console.error(e))
     },1000)
     return ()=>{
       clearTimeout(timeOutId)
     }
   },[search.value])
 
-  const [users,setUsers]=useState([])
   return (
     <Dialog open={isSearch} onClose={searchCloseHandler}>
       <Stack p={'2rem'} direction={'column'} width={'25rem'}>

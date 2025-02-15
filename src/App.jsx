@@ -1,7 +1,7 @@
 import { lazy, Suspense, useEffect } from 'react' 
 import { Route, Routes } from 'react-router-dom'
 import ProtectRoute from './components/auth/ProtectRoute'
-import Loader from './components/layout/Loader'
+import {Loader} from './components/layout/Loader'
 import { useDispatch, useSelector } from 'react-redux'
 import { userNotExists,userExists } from './redux/reducers/auth'
 import axios from 'axios'

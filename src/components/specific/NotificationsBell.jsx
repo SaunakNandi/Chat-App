@@ -4,7 +4,7 @@ import { useAcceptFriendRequestMutation, useGetNotificationsQuery } from '../../
 import { useErrors } from '../../hooks/hook'
 import { useDispatch, useSelector } from 'react-redux'
 import { setIsNotification } from '../../redux/reducers/misc'
-
+import toast from 'react-hot-toast'
 const NotificationsBell = () => {
 
   // data will get this from server json({success:true,request:all_requests})

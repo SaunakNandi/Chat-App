@@ -56,3 +56,42 @@ If a new friend is added, the "Chat" tag gets invalidated, automatically refetch
 ✅ Tag-Based Invalidation – Ensures fresh data when needed(when a get or post call is made).
 ✅ Efficient State Management – Data is stored in Redux and auto-updates the UI.
 ✅ Simplified API Handling – No need for manual useState/useEffect.
+
+
+
+// NOTE 2
+import { useEffect, useState } from "react";
+
+const useInfiniteScrollTop = (containerRef, totalPages, page, setPage, newData, shouldReverse = false) => {
+    const [data, setData] = useState([]);
+
+    useEffect(() => {
+        const container = containerRef.current;
+        if (!container) return;
+
+        const handleScroll = () => {
+            if (container.scrollTop === 0 && page < totalPages) {
+                setPage((prevPage) => prevPage + 1);
+            }
+        };
+
+        //  handleScroll runs every time the user scrolls.
+        container.addEventListener("scroll", handleScroll);
+        return () => container.removeEventListener("scroll", handleScroll);
+    }, [containerRef, page, totalPages, setPage]);
+
+    useEffect(() => {
+        if (newData && newData.length > 0) {
+            setData((prev) => (shouldReverse ? [...newData, ...prev] : [...prev, ...newData]));
+        }
+    }, [newData, shouldReverse]);
+
+    return { data, setData };
+};
+
+
+When you scroll inside the containerRef, these properties get updated:
+
+containerRef.current.scrollTop → Changes dynamically as you scroll up/down.
+containerRef.current.scrollHeight → Remains the same unless new content is loaded.
+containerRef.current.clientHeight → Remains constant (unless resized).

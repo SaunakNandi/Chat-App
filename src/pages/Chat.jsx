@@ -7,13 +7,14 @@ import { InputBox } from '../components/styles/StyledComponent'
 import { FileMenu } from '../components/FileMenu'
 import MessageComponent from '../components/shared/MessageComponent'
 import { getSocket } from '../socket'
-import { NEW_MESSAGE } from '../constants/events'
+import { NEW_MESSAGE, START_TYPING, STOP_TYPING } from '../constants/events'
 import { useChatDetailsQuery, useGetMessagesQuery } from '../redux/api/api.js'
 import { useErrors, useSocketEvents } from '../hooks/hook.jsx'
 import { useInfiniteScrollTop } from '6pp'
 import { useDispatch } from 'react-redux'
 import { setIsFileMenu } from '../redux/reducers/misc.js'
 import { removeNewMessagesAlert } from '../redux/reducers/chat.js'
+import { TypingLoader } from '../components/layout/Loader.jsx'
 
 
 // See the return statement to understand how Chat is getting called and chatId is comming
@@ -24,20 +25,23 @@ const Chat = ({chatId,user}) => {
   const [messages,setMessages]=useState([])
   const [fileMenuAnchor,setFileMenuAnchor]=useState(null)
   const [page,setPage]=useState(1)
+  const [IamTyping,setIamTyping]=useState(false)
+  const [userTyping,setUserTyping]=useState(false)
+  const typingTimeOut=useRef(null)
   const socket=getSocket()
   const dispatch=useDispatch()
   const chatDetails=useChatDetailsQuery({chatId,skip:!chatId})  // only call when chatId is there
+  const oldMessagesChunk=useGetMessagesQuery({chatId,page})
   const members=chatDetails?.data?.chat?.members
+  const bottomRef=useRef(null)
 
   const handleFileOpen=(e)=>{
     dispatch(setIsFileMenu(true))
     setFileMenuAnchor(e.currentTarget)
   }
   // console.log(chatDetails?.data?.chat)
-  const oldMessagesChunk=useGetMessagesQuery({chatId,page})
 
-
-  // need to see and understand the working of useInfiniteScrollTop. Need ChatGPT to make me understand
+  // see Note.txt-> NOTE2 to understand how useInfinteScrollTop may work internally
   // renaming data and setData
   const {data:oldMessages,setData:setOldMessages}=useInfiniteScrollTop(containerRef,oldMessagesChunk.data?.totalPages,page,setPage,oldMessagesChunk.data?.message)
   const errors=[
@@ -47,6 +51,7 @@ const Chat = ({chatId,user}) => {
   // console.log("oldmessages",oldMessages)
   // console.log(messages)
   // user is me
+  
   
   const sendMessage=(e)=>{
     e.preventDefault()
@@ -68,20 +73,58 @@ const Chat = ({chatId,user}) => {
     }
   },[chatId])
   
-  const newMessagesHandler=useCallback((data)=>{
-     console.log(data)  
+  const messageOnChange=(e)=>{
+    setMessage(e.target.value)
+    if(!IamTyping)
+    {
+      socket.emit(START_TYPING,{members,chatId})
+      setIamTyping(true)
+    }
+    if(typingTimeOut.current) clearTimeout(typingTimeOut.current)
+
+    typingTimeOut.current=setTimeout(()=>{
+      socket.emit(STOP_TYPING,{members,chatId})
+      setIamTyping(false)
+    },[2000])
+  }
+
+  useEffect(()=>{
+    if(bottomRef.current)
+      bottomRef.current.scrollIntoView({behavior:"smooth"})
+  },[messages])
+
+  const newMessagesListner=useCallback((data)=>{
+    //  console.log(data)  
      if(data.chatId !== chatId) return
     setMessages(prev=>[...prev,data.message])
   },[chatId])
+
+  const startTypingListner=useCallback((data)=>{
+    // console.log(data)  
+    // console.log("START Typing ",data)
+    if(data.chatId !== chatId) return
+    setUserTyping(true)
+  },[chatId])
+
+  const stopTypingListner=useCallback((data)=>{
+    if(data.chatId!==chatId) return;
+      setUserTyping(false)
+    // console.log("Stopping ",data)
+  },[chatId])
   
   // [NEW_MESSAGE] is a dynammic variable, writting in this way means {'NEW_MESSAGE':newMessageHandler}
-  const eventHandlerArr={[NEW_MESSAGE]:newMessagesHandler}   
+  const eventHandlerArr={
+    [NEW_MESSAGE]:newMessagesListner,
+    [START_TYPING]:startTypingListner,
+    [STOP_TYPING]:stopTypingListner
+  }   
   
   // custom hook
   useSocketEvents(socket,eventHandlerArr)
   useErrors(errors) 
   const allMessages=[...oldMessages,...messages]
   
+  // console.log("User is Typing ",userTyping)
   return chatDetails.isLoading? <Skeleton/>:(
     <>
       <Stack ref={containerRef} boxSizing={'border-box'} padding={'1rem'} spacing={'1rem'} bgcolor={gray} height={'90%'} 
@@ -95,6 +138,8 @@ const Chat = ({chatId,user}) => {
             <MessageComponent message={msg} user={user} key={msg._id}/>
           ))
         }
+        {userTyping && <TypingLoader/>}
+        
       </Stack>
       <form style={{ height:'10%'}} onSubmit={sendMessage}>
         <Stack direction={'row'} height={'100%'} padding={'1rem'} alignItems={'center'} position={'relative'}>
@@ -106,7 +151,7 @@ const Chat = ({chatId,user}) => {
           }} onClick={handleFileOpen}>
             <AttachFileIcon/>
           </IconButton>
-          <InputBox placeholder='Type Message here' value={message} onChange={e=>setMessage(e.target.value)}/>
+          <InputBox placeholder='Type Message here' value={message} onChange={e=>messageOnChange(e)}/>
           <IconButton type='submit' sx={{
             backgroundColor:orange,
             color:'white',
