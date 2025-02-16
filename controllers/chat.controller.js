@@ -12,7 +12,7 @@ const newGroupChat=async(req,res,next)=>{
     const allMembers=[...members,req.user]
     await Chat.create({name,groupChat:true,creator:req.user,members:allMembers})
     emitEvent(req,ALERT,allMembers,`Welcome to ${name} group chat`)
-    emitEvent(req,REFETCH_CHATS,members,`Welcome to ${name} group chat`)
+    emitEvent(req,REFETCH_CHATS,members)
 
     return res.status(201).json({
         sucess:true,
@@ -95,8 +95,9 @@ const addMembers=async(req,res,next)=>{
 
     await chat.save()
     const allUsersName=allNewMembers.map(x=>x.name).join(",") // [a,b,c] -> ["a", "b", "c"]
-    emitEvent(req,ALERT,chat.members,`${allUsersName} has been added to ${chat.name} group`)
-    emitEvent(req,REFETCH_CHATS,chat.members,`${allUsersName} has been added to ${chat.name} group`)
+    // console.log("all users",allUsersName)
+    emitEvent(req,ALERT,chat.members,{message:`${allUsersName} has been added to ${chat.name} group`,chatId})
+    emitEvent(req,REFETCH_CHATS,chat.members)
     return res.status(201).json({
         sucess:true,
         messsage:"Members added successfully"    
@@ -112,14 +113,15 @@ const removeMembers = async function(req,res,next){
     if(chat.creator.toString()!==req.user.toString())
             return next(new ErrorHandler('You are not allowed to remove members',403))
     if(chat.members.length<4) return next(new ErrorHandler('Group chat must have at least 3 members',400))
+        
+     const allChatMembers=chat.members.map((x)=>x.toString())
     
     chat.members=chat.members.filter(
         (member)=>member.toString()!==userId.toString()
     )
     await chat.save()
-
-    emitEvent(req,ALERT,chat.members,`${userToRemove.name} has been removed from ${chat.name} group`)
-    emitEvent(req,REFETCH_CHATS,chat.members,`${userToRemove.name} has been removed from ${chat.name} group`)
+    emitEvent(req,ALERT,chat.members,{message:`${userToRemove.name} has been removed from the group`,chatId})
+    emitEvent(req,REFETCH_CHATS,allChatMembers,{userId})
     return res.status(201).json({
         sucess:true,
         messsage:"Members removed successfully"    
@@ -278,6 +280,12 @@ const getMessages=async (req,res,next)=>{
         const {page=1}=req.query
         const resultPerPage=20
         const skip=(page-1)*resultPerPage
+
+        // Trying to access a group chat you are not a part of
+        const chat=await Chat.findById(chatId)
+        if(!chat) return next(new ErrorHandler("Chat not found",404))
+        if(!chat.members.includes(req.user.toString())) return next(new ErrorHandler("You are not allowed to access this chat",404))
+
         const [messages,totalMessagesCount]=await Promise.all([
             Message.find({chat:chatId}).sort({createdAt:-1}).skip(skip).limit(resultPerPage).populate('sender','name').lean(),
             Message.countDocuments({chat:chatId})

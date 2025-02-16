@@ -9,7 +9,7 @@ import { errorMiddleware } from './middlewares/error.js'
 import cookieParser from 'cookie-parser'
 import { Server } from 'socket.io'
 import {createServer} from 'http'
-import { NEW_MESSAGE, NEW_MESSAGE_ALERT, START_TYPING } from './constants/events.js'
+import { NEW_MESSAGE, NEW_MESSAGE_ALERT, START_TYPING, STOP_TYPING } from './constants/events.js'
 import {v4 as uuid} from 'uuid'
 import { getSockets } from './lib/helper.lib.js'
 import { Message } from './models/message.models.js'
@@ -62,7 +62,7 @@ io.use((socket,next)=>{
 
 // waiting for the event to get fired from socket.jsx in client side
 io.on('connection',(socket)=>{
-    // console.log('User connected')
+    console.log('User connected')
     const user=socket.user
     userSocketIDs.set(user._id.toString(),socket.id)  // keeping track of the user._id connected to the socket.id
     // console.log("userSocketIDs ",userSocketIDs)
@@ -85,7 +85,7 @@ io.on('connection',(socket)=>{
         }
         // members contains array of user ids
         const membersSocket=getSockets(members)  // contain socket id's of each member
-        // console.log("Emitting ",messageForRealTime)  
+        console.log("Emitting ",messageForRealTime)  
         // console.log("Members: ",members)
 
         // io.to() This tells Socket.IO to send a message only to the specified socket IDs.
@@ -102,11 +102,18 @@ io.on('connection',(socket)=>{
         }
     })
     socket.on(START_TYPING,({members,chatId})=>{
-        console.log("typing ",members,chatId)
+        // console.log("start typing ",members,chatId)
         const membersSockets=getSockets(members)
         socket.to(membersSockets).emit(START_TYPING,{chatId})
     })
-
+    socket.on(STOP_TYPING,({members,chatId})=>{
+        // console.log("stoped typing ",members,chatId)
+        if(members)  // temporary fix for Cannot destructure property 'members' of 'undefined' as it is undefined error
+        {
+            const membersSockets=getSockets(members)
+            socket.to(membersSockets).emit(STOP_TYPING,{chatId})
+        }
+    })
     socket.on('disconnect',()=>{
         console.log('User disconnected')
         userSocketIDs.delete(user._id.toString())

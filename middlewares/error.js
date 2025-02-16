@@ -18,10 +18,17 @@ const errorMiddleware=(err,req,res,next)=>{
         err.message=`Invalid Format of path ${errorPath}`
         err.statusCode=400
     }
-    return res.status(err.statusCode).json({
+    // return res.status(err.statusCode).json({
+    //     success:false,
+    //     message:envMode === 'DEVELOPMENT' ? err:err.message,
+    // })
+    const response={
         success:false,
-        message:envMode === 'DEVELOPMENT' ? err:err.message,
-    })
+        message:err.message
+    }
+    if(envMode === 'DEVELOPMENT')
+        response.error=err
+    return res.status(err.statusCode).json(response)
 }
 
 export {errorMiddleware}
