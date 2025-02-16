@@ -26,7 +26,7 @@ const NotificationsBell = () => {
       }
       else{
         console.error(error)
-        toast.error(error || "Something went wrong")
+        toast.error(error || "Notification not found")
       }
     } catch (error) {
       console.error(error)

@@ -53,7 +53,7 @@ const AppLayout = () =>(WrappedComponent)=> {
         console.log("Deleting chat", _id)
     }
     const newMessageAlertHandler=useCallback((data)=>{
-        console.log("Data ",data)
+        // console.log("Data ",data)
         if(data.chatId==chatId) return
         dispatch(setNewMessagesAlert(data))
     },[chatId])

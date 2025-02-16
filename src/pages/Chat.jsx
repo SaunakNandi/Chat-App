@@ -94,8 +94,8 @@ const Chat = ({chatId,user}) => {
   // if you are not a part of the group you are trying to look
   useEffect(()=>{
     console.log("Chat Details ",chatDetails)
-    if(!chatDetails.data?.chat) return navigate(-1)
-  },[chatDetails.data])
+    if(chatDetails.isError) return navigate('/')
+  },[chatDetails.isError])
 
   useEffect(()=>{
     if(bottomRef.current)

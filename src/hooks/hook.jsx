@@ -6,6 +6,7 @@ import toast from "react-hot-toast";
 export const useErrors=(errors=[])=>{
     useEffect(()=>{
         errors.forEach(({isError,error,fallback})=>{
+            // console.log(error)
             if(isError)
             {
                 if(fallback) fallback()
@@ -36,7 +37,7 @@ export const useAsyncMutation=(mutationHook)=>{
               }
             } catch (error) {
               console.log(error)
-              toast.error("Something went wrong",{id:toastId})
+              toast.error("Problem in useAsyncMutation",{id:toastId})
             }
         finally{
             setIsLoading(false)
