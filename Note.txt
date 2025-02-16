@@ -95,3 +95,13 @@ When you scroll inside the containerRef, these properties get updated:
 containerRef.current.scrollTop → Changes dynamically as you scroll up/down.
 containerRef.current.scrollHeight → Remains the same unless new content is loaded.
 containerRef.current.clientHeight → Remains constant (unless resized).
+
+
+
+
+// Note 3
+The reason your frontend socket.on(NEW_MESSAGE, newMessagesListner) only listens when the server emits NEW_MESSAGE, but not when the client emits it, is because:
+
+Socket.io doesn't listen to events emitted by itself – When you call socket.emit(NEW_MESSAGE, { chatId, members, message }) on the client, that event is sent to the server, not to the same client. The socket.on(NEW_MESSAGE, newMessagesListner) on the client will only run when the server emits NEW_MESSAGE.
+
+Server receives and re-emits the event – Your server listens for NEW_MESSAGE, processes it, and then emits it to the relevant sockets (io.to(membersSocket).emit(NEW_MESSAGE, {...})). This is when your client-side listener picks it up.

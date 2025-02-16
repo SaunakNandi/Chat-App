@@ -57,6 +57,7 @@ const Chat = ({chatId,user}) => {
     e.preventDefault()
     if(!message.trim()) return
     
+    // NOTE 3 - Why NEW_MESSAGE is listned in server but not in client when emitted from here
     // Emitting message to the server
     socket.emit(NEW_MESSAGE,{chatId,members,message})
     setMessage("")
@@ -94,7 +95,7 @@ const Chat = ({chatId,user}) => {
   },[messages])
 
   const newMessagesListner=useCallback((data)=>{
-    //  console.log(data)  
+     console.log(data)  
      if(data.chatId !== chatId) return
     setMessages(prev=>[...prev,data.message])
   },[chatId])
@@ -126,7 +127,7 @@ const Chat = ({chatId,user}) => {
   },[chatId])
   // [NEW_MESSAGE] is a dynammic variable, writting in this way means {'NEW_MESSAGE':newMessageHandler}
   const eventHandlerArr={
-    [ALERT]:alertListner,
+    // [ALERT]:alertListner,
     [NEW_MESSAGE]:newMessagesListner,
     [START_TYPING]:startTypingListner,
     [STOP_TYPING]:stopTypingListner
@@ -135,6 +136,7 @@ const Chat = ({chatId,user}) => {
   // custom hook
   useSocketEvents(socket,eventHandlerArr)
   useErrors(errors) 
+
   const allMessages=[...oldMessages,...messages]
   
   // console.log("User is Typing ",userTyping)
