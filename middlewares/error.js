@@ -22,12 +22,14 @@ const errorMiddleware=(err,req,res,next)=>{
     //     success:false,
     //     message:envMode === 'DEVELOPMENT' ? err:err.message,
     // })
+    // console.log(envMode)
     const response={
         success:false,
         message:err.message
     }
     if(envMode === 'DEVELOPMENT')
         response.error=err
+    // console.log("Error response ",response)
     return res.status(err.statusCode).json(response)
 }
 

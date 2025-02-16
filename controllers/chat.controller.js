@@ -188,14 +188,14 @@ const getChatDetails = async function(req,res,next){
         {
             const chat=await Chat.findById(req.params.id).populate('members','name avatar').lean()
             // we dont want to alter the chat.members in database so we will not save but we still need to save the chat.members so we can use .lean()
-            console.log("chat members",chat.members)
+            // console.log("chat members",chat.members)
             // Now chat will not be a mongoose object i.e it will be a plain javascript object
             chat.members=chat.members.map(({_id,name,avatar})=>({
                 _id,
                 name,
                 avatar:avatar.url
             }))
-            console.log("chat members after",chat.members)
+            // console.log("chat members after",chat.members)
             return res.status(201).json({
                 sucess:true,
                 chat
@@ -283,8 +283,9 @@ const getMessages=async (req,res,next)=>{
 
         // Trying to access a group chat you are not a part of
         const chat=await Chat.findById(chatId)
+        // console.log("chat ",chat)
         if(!chat) return next(new ErrorHandler("Chat not found",404))
-        if(!chat.members.includes(req.user.toString())) return next(new ErrorHandler("You are not allowed to access this chat",404))
+        if(!chat.members.includes(req.user.toString())) return next(new ErrorHandler("You are not allowed to access this chat",403))
 
         const [messages,totalMessagesCount]=await Promise.all([
             Message.find({chat:chatId}).sort({createdAt:-1}).skip(skip).limit(resultPerPage).populate('sender','name').lean(),

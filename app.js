@@ -120,7 +120,7 @@ io.on('connection',(socket)=>{
     })
 })
 
-// app.use(errorMiddleware)  // this will be the middleware to handle the errors
+app.use(errorMiddleware)  // this will be the middleware to handle the errors
 
 
 server.listen(3000,()=>{
