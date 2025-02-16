@@ -4,7 +4,7 @@ import Title from '../shared/Title'
 import Grid from '@mui/material/Grid2'
 import ChatList from '../specific/ChatList'
 // import { samplechats } from '../../constants/sample_data'
-import { useParams } from 'react-router-dom'
+import { useNavigate, useParams } from 'react-router-dom'
 import Profile from '../specific/Profile'
 import { useMyChatsQuery } from '../../redux/api/api'
 import { Drawer, Skeleton } from '@mui/material'
@@ -27,6 +27,7 @@ const AppLayout = () =>(WrappedComponent)=> {
     const {isMobile}=useSelector((state)=>state.misc)
     const {user}=useSelector((state)=>state.auth)
     const {newMessagesAlert}=useSelector((state)=>state.chat)
+    const navigate=useNavigate()
     // useMyChatsQuery returns an object that includes data.
     // {
     //     data,         // The fetched chat data (or undefined if still loading)
@@ -35,13 +36,11 @@ const AppLayout = () =>(WrappedComponent)=> {
     //     refetch       // Function to manually refetch data
     //   }
     const {isLoading,data,isError,error,refetch}=useMyChatsQuery("")
-    console.log(data)
-    
-    useErrors([{error,isError}])
-
+    // console.log(data)
     useEffect(()=>{
-        // when we loads the page, in the localStorage newMessagesAlert get reset =>{chatId: "", count: 0}
-        // to solve this we will change the initilization of newMessagesAlert in chat.js
+        // when we loads the page, in the newMessagesAlert get reset =>{chatId: "", count: 0} and new message is not visible
+        // to solve this we will store the newMessagesAlert in localStorage and change the initilization of newMessagesAlert in chat.js
+        console.log(newMessagesAlert)
         getOrSaveFromStorage({key:NEW_MESSAGE_ALERT,value:newMessagesAlert})
     },[newMessagesAlert])
 
@@ -54,6 +53,7 @@ const AppLayout = () =>(WrappedComponent)=> {
         console.log("Deleting chat", _id)
     }
     const newMessageAlertHandler=useCallback((data)=>{
+        console.log("Data ",data)
         if(data.chatId==chatId) return
         dispatch(setNewMessagesAlert(data))
     },[chatId])
@@ -62,9 +62,12 @@ const AppLayout = () =>(WrappedComponent)=> {
         console.log("New message")
         dispatch(incrementNotifications())
     },[dispatch])
-    const refetchListener=useCallback(()=>{
+    const refetchListener=useCallback((data)=>{
+        console.log("Refetching")
+        console.log(user._id.toString()==data.userId.toString())
         refetch()
-    },[refetch])
+        if(user._id.toString()==data.userId.toString()) navigate('/')
+    },[refetch,navigate])
     const eventHandlers={
         [NEW_MESSAGE_ALERT]:newMessageAlertHandler,
         [NEW_REQUEST]:newRequestListener, 
@@ -72,7 +75,7 @@ const AppLayout = () =>(WrappedComponent)=> {
     }   
       
     useSocketEvents(socket,eventHandlers)
-    
+    useErrors([{error,isError}])
     return(
         <>
             <Title/>

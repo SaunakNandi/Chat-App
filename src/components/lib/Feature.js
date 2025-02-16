@@ -13,8 +13,8 @@ const transformImage=(url="",width=100)=>{
 // if A sends message to B and B have not checked yet then B can see 1 new message, but if B reloads the page then the 1 New Message get removed.
 // So we will store the newMessagesAlert in localStorage to save the message alert.
 const getOrSaveFromStorage=({key,value,get})=>{
+  // console.log("got called ",localStorage.getItem(key),get)
   if(get) return localStorage.getItem(key)? JSON.parse(localStorage.getItem(key)):null
-  console.log("got called")
   localStorage.setItem(key,JSON.stringify(value))
 }
 export {fileFormat, transformImage, getOrSaveFromStorage}

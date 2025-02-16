@@ -1,21 +1,27 @@
 import React, { useState, memo, useEffect, lazy, Suspense } from 'react'
 import Grid from '@mui/material/Grid2'
 import { Add as AddIcon, Delete as DeleteIcon, Done as DoneIcon, Edit as EditIcon, KeyboardBackspace as KeyboardBackspaceIcon, Menu as MenuIcon, X } from '@mui/icons-material'
-import { Backdrop, Box, Button, Drawer, IconButton, Stack, TextField, Tooltip, Typography } from '@mui/material'
+import { Backdrop, Box, Button, Drawer, IconButton, Skeleton, Stack, TextField, Tooltip, Typography } from '@mui/material'
 import { useNavigate, useSearchParams } from 'react-router-dom'
 import { Link } from '../components/styles/StyledComponent'
 import AvatarCard from '../components/shared/AvatarCard'
 import { samplechats, sampleUsers } from '../constants/sample_data'
 import AddMemberDialog from '../components/AddMemberDialog'
 import UserItem from '../components/shared/UserItem'
-import { useChatDetailsQuery, useMyGroupsQuery, useRenameGroupMutation } from '../redux/api/api'
+import { useAddGroupMemberMutation, useChatDetailsQuery, useMyGroupsQuery, useRemoveGroupMemberMutation, useRenameGroupMutation } from '../redux/api/api'
 import { Loader } from '../components/layout/Loader'
 import { useAsyncMutation, useErrors } from '../hooks/hook'
+import { useDispatch, useSelector } from 'react-redux'
+import { setIsAddMember } from '../redux/reducers/misc'
 
 const ConfirmDeleteDialog=lazy(()=>import('../components/ConfirmDeleteDialog'))
 const Groups = () => {
   const navigate=useNavigate()
+  const dispatch=useDispatch()
+  const {isAddMember}=useSelector(state=>state.misc)
   const [updateGroup,isLoadingGroupName]=useAsyncMutation(useRenameGroupMutation)
+  const [removeMembers,isLoadingRemoveMembers]=useAsyncMutation(useRemoveGroupMemberMutation)
+  
   const [isMobileMenuOpen,setIsMobileMenuOpen]=useState(true)
   const [isEdit,setIsEdit]=useState(false)
   const [confirmDeleteDialog,setConfirmDeleteDialog]=useState(false)
@@ -26,6 +32,7 @@ const Groups = () => {
   const myGroups=useMyGroupsQuery("")
   const groupDetails=useChatDetailsQuery({chatId,populate:true},{skip:!chatId}) // fetch only when chatId is there
   // console.log(groupDetails?.data)
+  
   const errors=[
     {
       isError:myGroups.isError,
@@ -45,6 +52,12 @@ const Groups = () => {
       setGroupNameUpdatedValue(groupDetails.data.chat.name)
       setMembers(groupDetails.data.chat.members)
     }
+    return () => {
+      setGroupName("");
+      setGroupNameUpdatedValue("");
+      setMembers([]);
+      setIsEdit(false);
+    };
   },[groupDetails.data])
 
   const handleMobile=()=>{
@@ -53,7 +66,6 @@ const Groups = () => {
   const handleMobileClose=()=>{
     setIsMobileMenuOpen(false)
   }
-  const isAddMember=false
 
   const updateGroupName=()=>{
     setIsEdit(false)
@@ -64,7 +76,7 @@ const Groups = () => {
     setConfirmDeleteDialog(true)
   }
   const openAddMember=()=>{
-    setConfirmDeleteDialog(false)
+    dispatch(setIsAddMember(true))
   }
   const deleteHandler=()=>{
     console.log('Delete')
@@ -75,10 +87,14 @@ const Groups = () => {
     setConfirmDeleteDialog(false)
   }
 
-  const removeMemberHandler=(id)=>{
-    console.log('Remove',id)
+  const removeMemberHandler=(userId)=>{
+    removeMembers("Removing Member...",{chatId, userId})
   }
   useEffect(()=>{
+    if (chatId) {
+      setGroupName(`Group Name ${chatId}`);
+      setGroupNameUpdatedValue(`Group Name ${chatId}`);
+    }
     return ()=>{
       setGroupNameUpdatedValue('')
       setGroupName('')
@@ -180,7 +196,8 @@ const Groups = () => {
 
               {
                 // In the UserItem isAdded passed as a prop is true by default. If you pass any props without declaring what it is, in the component side it will be a boolean value which will be true by default.
-                members && members.map((x, i) =>(
+                isLoadingRemoveMembers? <Skeleton/>:
+                members && members.map((x) =>(
                   <UserItem user={x} key={X._id} isAdded handler={()=>removeMemberHandler(x._id)} 
                   styling={{
                     boxShadow: '0 0 0.5rem rgba(0,0,0,0.2)',
@@ -200,14 +217,14 @@ const Groups = () => {
         {
           isAddMember && (
             <Suspense fallback={<Backdrop  open/>}>
-              <AddMemberDialog open={isAddMember} handleClose={openAddMember}/>
+              <AddMemberDialog chatId={chatId}/>
             </Suspense>
           )
         }
       {
         confirmDeleteDialog && (
           <>
-            <Suspense fallback={<Backdrop  open/>}>
+            <Suspense fallback={<Backdrop open/>}>
               <ConfirmDeleteDialog open={confirmDeleteDialog} handleClose={closeConfirmDeleteHandler}
               deleteHandler={deleteHandler}/>
             </Suspense>

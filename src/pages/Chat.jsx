@@ -15,6 +15,7 @@ import { useDispatch } from 'react-redux'
 import { setIsFileMenu } from '../redux/reducers/misc.js'
 import { removeNewMessagesAlert } from '../redux/reducers/chat.js'
 import { TypingLoader } from '../components/layout/Loader.jsx'
+import { useNavigate } from 'react-router-dom'
 
 
 // See the return statement to understand how Chat is getting called and chatId is comming
@@ -30,11 +31,12 @@ const Chat = ({chatId,user}) => {
   const typingTimeOut=useRef(null)
   const socket=getSocket()
   const dispatch=useDispatch()
+  const navigate=useNavigate()
   const chatDetails=useChatDetailsQuery({chatId,skip:!chatId})  // only call when chatId is there
   const oldMessagesChunk=useGetMessagesQuery({chatId,page})
   const members=chatDetails?.data?.chat?.members
   const bottomRef=useRef(null)
-
+  
   const handleFileOpen=(e)=>{
     dispatch(setIsFileMenu(true))
     setFileMenuAnchor(e.currentTarget)
@@ -89,13 +91,19 @@ const Chat = ({chatId,user}) => {
     },[2000])
   }
 
+  // if you are not a part of the group you are trying to look
+  useEffect(()=>{
+    console.log("Chat Details ",chatDetails)
+    if(!chatDetails.data?.chat) return navigate(-1)
+  },[chatDetails.data])
+
   useEffect(()=>{
     if(bottomRef.current)
       bottomRef.current.scrollIntoView({behavior:"smooth"})
   },[messages])
 
   const newMessagesListner=useCallback((data)=>{
-     console.log(data)  
+    //  console.log(data)  
      if(data.chatId !== chatId) return
     setMessages(prev=>[...prev,data.message])
   },[chatId])
@@ -113,21 +121,23 @@ const Chat = ({chatId,user}) => {
     // console.log("Stopping ",data)
   },[chatId])
   
-  const alertListner=useCallback((content)=>{
-    const messageForAlert={
-      content,
-      sender:{
-          _id:"hiuwebfiuabufp2983ryhqh1",
-          name:"Admin"
-      },
-      chat:chatId,
-      createdAt:new Date().toISOString(),
-    }
-    setMessages((prev)=>[...prev,messageForAlert])
+  const alertListner=useCallback((data)=>{
+    if (data.chatId !== chatId) return;
+      const messageForAlert = {
+        content: data.message,
+        sender: {
+          _id: "djasdhajksdhasdsadasdas",
+          name: "Admin",
+        },
+        chat: chatId,
+        createdAt: new Date().toISOString(),
+      };
+
+      setMessages((prev) => [...prev, messageForAlert]);
   },[chatId])
   // [NEW_MESSAGE] is a dynammic variable, writting in this way means {'NEW_MESSAGE':newMessageHandler}
   const eventHandlerArr={
-    // [ALERT]:alertListner,
+    [ALERT]:alertListner,
     [NEW_MESSAGE]:newMessagesListner,
     [START_TYPING]:startTypingListner,
     [STOP_TYPING]:stopTypingListner
