@@ -154,7 +154,7 @@ const getMyNotifications=async(req,res)=>{
 const getMyFriends=async(req,res)=>{
     const {chatId}=req.query
     const chats=await Chat.find({members:req.user,groupChat:false}).populate('members','name avatar')
-    const friends=chats.map(({members})=>{
+    let friends=chats.map(({members})=>{
         const otherUser=getOtherMember(members,req.user)
         return {
             _id:otherUser._id,
@@ -162,6 +162,8 @@ const getMyFriends=async(req,res)=>{
             avatar:otherUser.avatar.url
         }
     })
+    friends=Array.from(new Map(friends.map((x)=> [x._id.toString(),x])).values())
+    // console.log("my friends ",friends)
     if(chatId)
     {
         const chat=await Chat.findById(chatId)
