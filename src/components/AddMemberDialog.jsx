@@ -23,7 +23,7 @@ const AddMemberDialog = ({chatId}) => {
         dispatch(setIsAddMember(false))
     }
     useErrors([{isError,error}])
-    console.log(data)
+    // console.log(data)
   return (
     <Dialog open={isAddMember} onClose={closeHandler}>
         <Stack p={'2rem'} width={'20rem'} spacing={'2rem'}>

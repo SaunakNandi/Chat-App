@@ -17,6 +17,7 @@ const NewGroups = () => {
   const {isError,isLoading,data,error}=useAvailableFriendsQuery()
   const [newGroup,isLoadingNewGroup]=useAsyncMutation(useNewGroupMutation)
   const selectMemberHandler=(id)=>{
+    console.log(id)
     // setMembers(prev=>prev.map(user=>user._id===id? {...user,isAdded:!user.isAdded}:user))
     setSelectedMembers(prev=> prev.includes(id)? prev.filter((curr)=>curr!==id):[...prev,id])
   }
@@ -26,18 +27,18 @@ const NewGroups = () => {
       error
     }
   ]
-  useErrors(errors)
   const submitHandler=()=>{
     if(!groupName.value) return toast.error('Group name is required')
-    if(selectedMembers.length<2) return toast.error('Please select ateast 2 members')
-
-    // creating group
-    newGroup("Creating New Group...",{name:groupName.value,members:selectedMembers})
-    closeHandler()
+      if(selectedMembers.length<2) return toast.error('Please select ateast 2 members')
+        
+        // creating group
+        newGroup("Creating New Group...",{name:groupName.value,members:selectedMembers})
+        closeHandler()
   }
   const closeHandler=()=>{
     dispatch(setIsNewGroup(false))
   }
+  useErrors(errors)
   return (
     <Dialog onClose={closeHandler} open={isNewGroup}>
       <Stack p={{xs:'1rem',sm:"2rem"}} maxWidth={'25rem'} width={'25rem'} spacing={'2rem'}>

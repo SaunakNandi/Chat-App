@@ -1,14 +1,14 @@
 import React, { useState, memo, useEffect, lazy, Suspense } from 'react'
 import Grid from '@mui/material/Grid2'
 import { Add as AddIcon, Delete as DeleteIcon, Done as DoneIcon, Edit as EditIcon, KeyboardBackspace as KeyboardBackspaceIcon, Menu as MenuIcon, X } from '@mui/icons-material'
-import { Backdrop, Box, Button, Drawer, IconButton, Skeleton, Stack, TextField, Tooltip, Typography } from '@mui/material'
+import { Backdrop, Box, Button, CircularProgress, Drawer, IconButton, Stack, TextField, Tooltip, Typography } from '@mui/material'
 import { useNavigate, useSearchParams } from 'react-router-dom'
 import { Link } from '../components/styles/StyledComponent'
 import AvatarCard from '../components/shared/AvatarCard'
 import { samplechats, sampleUsers } from '../constants/sample_data'
 import AddMemberDialog from '../components/AddMemberDialog'
 import UserItem from '../components/shared/UserItem'
-import { useAddGroupMemberMutation, useChatDetailsQuery, useMyGroupsQuery, useRemoveGroupMemberMutation, useRenameGroupMutation } from '../redux/api/api'
+import { useAddGroupMemberMutation, useChatDetailsQuery, useDeleteChatMutation, useMyGroupsQuery, useRemoveGroupMemberMutation, useRenameGroupMutation } from '../redux/api/api'
 import { Loader } from '../components/layout/Loader'
 import { useAsyncMutation, useErrors } from '../hooks/hook'
 import { useDispatch, useSelector } from 'react-redux'
@@ -21,7 +21,7 @@ const Groups = () => {
   const {isAddMember}=useSelector(state=>state.misc)
   const [updateGroup,isLoadingGroupName]=useAsyncMutation(useRenameGroupMutation)
   const [removeMembers,isLoadingRemoveMembers]=useAsyncMutation(useRemoveGroupMemberMutation)
-  
+  const [deleteGroup,isLoadingDeleteGroup]=useAsyncMutation(useDeleteChatMutation) 
   const [isMobileMenuOpen,setIsMobileMenuOpen]=useState(true)
   const [isEdit,setIsEdit]=useState(false)
   const [confirmDeleteDialog,setConfirmDeleteDialog]=useState(false)
@@ -79,8 +79,9 @@ const Groups = () => {
     dispatch(setIsAddMember(true))
   }
   const deleteHandler=()=>{
-    console.log('Delete')
+    deleteGroup("Deleting Grorup... ",chatId)
     closeConfirmDeleteHandler()
+    navigate('/')
   }
 
   const closeConfirmDeleteHandler=()=>{
@@ -196,7 +197,7 @@ const Groups = () => {
 
               {
                 // In the UserItem isAdded passed as a prop is true by default. If you pass any props without declaring what it is, in the component side it will be a boolean value which will be true by default.
-                isLoadingRemoveMembers? <Skeleton/>:
+                isLoadingRemoveMembers? <CircularProgress/>:
                 members && members.map((x) =>(
                   <UserItem user={x} key={X._id} isAdded handler={()=>removeMemberHandler(x._id)} 
                   styling={{

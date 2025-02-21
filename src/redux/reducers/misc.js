@@ -6,7 +6,7 @@ const initialState={
     isMobile:false,
     isSearch:false,
     isFileMenu:false,
-    isDeletemenu:false,
+    isDeleteMenu:false,
     uploadingLoader:false,
     selectedDeleteChat:{
         chatId:"",
@@ -36,7 +36,7 @@ const miscSlice=createSlice({
             state.isFileMenu=action.payload
         },
         setIsDeletemenu:(state,action)=>{
-            state.isDeletemenu=action.payload
+            state.isDeleteMenu=action.payload
         },
         setUploadingLoader:(state,action)=>{
             state.uploadingLoader=action.payload

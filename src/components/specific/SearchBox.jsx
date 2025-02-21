@@ -51,7 +51,7 @@ const SearchBox = () => {
           },
         }}/>
         <List>
-          {
+          { users && 
             users.map((x)=>(
               <UserItem user={x} key={x._id} 
               handler={addFriendHandler} handlerIsLoading={isLoadingSendFriendReq}/>

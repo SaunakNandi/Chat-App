@@ -43,7 +43,7 @@ const api=createApi({
                 credentials:"include",
                 body:data,
             }),
-            invalidatesTags:["User"]  // Marks "Chat" data as stale, refetches next time
+            invalidatesTags:["User"]  // Marks "User" data as stale, refetches next time
             // In RTK Query, stale data means cached data that is no longer considered up-to-date and needs to be refetched from the server.
         }),
 
@@ -150,6 +150,14 @@ const api=createApi({
                 body:{members,chatId},
             }),
             invalidatesTags:["Chat"] // refetching to load chats for new added friend
+        }),
+        deleteChat: builder.mutation({
+            query:(chatId)=>({
+                url:`chat/${chatId}`,
+                method:"DELETE",
+                credentials:"include",
+            }),
+            invalidatesTags:["Chat"]
         })
     })
 })
@@ -159,4 +167,5 @@ console.log(api.endpoints?.acceptFriendRequest) // to about the hooks created fo
 
 export default api
 export const {useMyChatsQuery,useLazySearchUserQuery,useSendFriendRequestMutation,useGetNotificationsQuery,
-    useAcceptFriendRequestMutation,useChatDetailsQuery,useGetMessagesQuery, useSendAttachmentsMutation, useMyGroupsQuery,useAvailableFriendsQuery,useNewGroupMutation,useRenameGroupMutation,useRemoveGroupMemberMutation,useAddGroupMemberMutation}=api
+    useAcceptFriendRequestMutation,useChatDetailsQuery,useGetMessagesQuery, useSendAttachmentsMutation, useMyGroupsQuery,useAvailableFriendsQuery,useNewGroupMutation,useRenameGroupMutation,useRemoveGroupMemberMutation,useAddGroupMemberMutation,
+    useDeleteChatMutation}=api

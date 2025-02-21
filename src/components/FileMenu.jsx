@@ -57,7 +57,7 @@ export const FileMenu = ({anchorEl,chatId}) => {
               </Tooltip>
               <ListItemText style={{marginLeft:'0.5rem'}}>Image</ListItemText>
               <input type="file" multiple accept='image/png, image/jpeg, image/gif, image/jpg'
-              style={{display:'none'}} onChange={(e)=>fileChangeHandler(e,"Images")}
+               onChange={(e)=>fileChangeHandler(e,"Images")}
               ref={imageRef}/>
             </MenuItem>
           

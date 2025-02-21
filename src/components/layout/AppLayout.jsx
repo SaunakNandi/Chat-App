@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect } from 'react'
+import React, { useCallback, useEffect, useRef } from 'react'
 import Header from './Header'
 import Title from '../shared/Title'
 import Grid from '@mui/material/Grid2'
@@ -9,18 +9,19 @@ import Profile from '../specific/Profile'
 import { useMyChatsQuery } from '../../redux/api/api'
 import { Drawer, Skeleton } from '@mui/material'
 import { useDispatch, useSelector } from 'react-redux'
-import { setIsMobile } from '../../redux/reducers/misc'
+import { setIsDeletemenu, setIsMobile, setSelectedDeleteChat } from '../../redux/reducers/misc'
 import { useErrors } from '../../hooks/hook'
 import { getSocket } from '../../socket'
 import { NEW_REQUEST, NEW_MESSAGE_ALERT, REFETCH_CHATS } from '../../constants/events'
 import { incrementNotifications, setNewMessagesAlert } from '../../redux/reducers/chat'
 import { useSocketEvents } from '../../hooks/hook'
 import { getOrSaveFromStorage } from '../lib/Feature.js'
+import DeleteChatMenu from '../DeleteChatMenu.jsx'
 // HOC
 const AppLayout = () =>(WrappedComponent)=> {
   return (props)=>{
     const socket=getSocket()
-    console.log(socket.id)
+    // console.log(socket.id)
     const params=useParams()
     const chatId=params.chatId
     const dispatch=useDispatch()
@@ -36,7 +37,8 @@ const AppLayout = () =>(WrappedComponent)=> {
     //     refetch       // Function to manually refetch data
     //   }
     const {isLoading,data,isError,error,refetch}=useMyChatsQuery("")
-    // console.log(data)
+    console.log(data)
+    const deleteMenuAnchor=useRef(null)
     useEffect(()=>{
         // when we loads the page, in the newMessagesAlert get reset =>{chatId: "", count: 0} and new message is not visible
         // to solve this we will store the newMessagesAlert in localStorage and change the initilization of newMessagesAlert in chat.js
@@ -48,9 +50,11 @@ const AppLayout = () =>(WrappedComponent)=> {
     const handleMobileClose=()=>{
         dispatch(setIsMobile(false))
     }
-    const handleDeleteChat=(e,_id,groupChat)=>{
-        e.preventDefault()
-        console.log("Deleting chat", _id)
+    const handleDeleteChat=(e,chatId,groupChat)=>{
+        dispatch(setIsDeletemenu(true))
+        // selectedDeleteChat called in DeleteChatMenu
+        dispatch(setSelectedDeleteChat({chatId,groupChat}))
+        deleteMenuAnchor.current=e.currentTarget
     }
     const newMessageAlertHandler=useCallback((data)=>{
         // console.log("Data ",data)
@@ -59,12 +63,12 @@ const AppLayout = () =>(WrappedComponent)=> {
     },[chatId])
 
     const newRequestListener =useCallback(()=>{
-        console.log("New message")
+        // console.log("New message")
         dispatch(incrementNotifications())
     },[dispatch])
     const refetchListener=useCallback((data)=>{
         console.log("Refetching")
-        console.log(user._id.toString()==data.userId.toString())
+        console.log(data)
         refetch()
         if(user._id.toString()==data.userId.toString()) navigate('/')
     },[refetch,navigate])
@@ -82,6 +86,7 @@ const AppLayout = () =>(WrappedComponent)=> {
 
             {/* Navbar */}
             <Header/>
+            <DeleteChatMenu dispatch={dispatch} deleteMenuAnchor={deleteMenuAnchor.current}/>
             {
                 isLoading?<Skeleton/>:(
                     // Hamburger/Menubar icon
