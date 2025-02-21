@@ -158,6 +158,14 @@ const api=createApi({
                 credentials:"include",
             }),
             invalidatesTags:["Chat"]
+        }),
+        leaveGroup: builder.mutation({
+            query:(chatId)=>({
+                url:`chat/leave/${chatId}`,
+                method:"DELETE",
+                credentials:"include",
+            }),
+            invalidatesTags:["Chat"]
         })
     })
 })
@@ -168,4 +176,4 @@ console.log(api.endpoints?.acceptFriendRequest) // to about the hooks created fo
 export default api
 export const {useMyChatsQuery,useLazySearchUserQuery,useSendFriendRequestMutation,useGetNotificationsQuery,
     useAcceptFriendRequestMutation,useChatDetailsQuery,useGetMessagesQuery, useSendAttachmentsMutation, useMyGroupsQuery,useAvailableFriendsQuery,useNewGroupMutation,useRenameGroupMutation,useRemoveGroupMemberMutation,useAddGroupMemberMutation,
-    useDeleteChatMutation}=api
+    useDeleteChatMutation,useLeaveGroupMutation}=api
