@@ -19,8 +19,8 @@ export const ChatList = ({w="100%",chats=[],chatId,onlineUsers=[],
                 const newMessageAlert=newMessagesAlert.find((alert)=>alert.chatId === _id)
                 // console.log(newMessageAlert)
                 
-                const isOnline=onlineUsers.includes(_id)
-                // const isOnline=members?.some((member)=>onlineUsers.includes(_id))
+                // const isOnline=onlineUsers.includes(_id)
+                const isOnline=members?.some((member)=>onlineUsers.includes(member))
                 return (<ChatItem newMessageAlert={newMessageAlert} isOnline={isOnline} avatar={avatar}
                 name={name} _id={_id} key={_id} groupChat={groupChat}
                 sameSender={chatId===_id}

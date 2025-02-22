@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useRef } from 'react'
+import React, { useCallback, useEffect, useRef, useState } from 'react'
 import Header from './Header'
 import Title from '../shared/Title'
 import Grid from '@mui/material/Grid2'
@@ -12,7 +12,7 @@ import { useDispatch, useSelector } from 'react-redux'
 import { setIsDeletemenu, setIsMobile, setSelectedDeleteChat } from '../../redux/reducers/misc'
 import { useErrors } from '../../hooks/hook'
 import { getSocket } from '../../socket'
-import { NEW_REQUEST, NEW_MESSAGE_ALERT, REFETCH_CHATS } from '../../constants/events'
+import { NEW_REQUEST, NEW_MESSAGE_ALERT, REFETCH_CHATS, ONLINE_USERS } from '../../constants/events'
 import { incrementNotifications, setNewMessagesAlert } from '../../redux/reducers/chat'
 import { useSocketEvents } from '../../hooks/hook'
 import { getOrSaveFromStorage } from '../lib/Feature.js'
@@ -29,6 +29,7 @@ const AppLayout = () =>(WrappedComponent)=> {
     const {user}=useSelector((state)=>state.auth)
     const {newMessagesAlert}=useSelector((state)=>state.chat)
     const navigate=useNavigate()
+    const [onlineUsers,setOnlineUsers]=useState([])
     // useMyChatsQuery returns an object that includes data.
     // {
     //     data,         // The fetched chat data (or undefined if still loading)
@@ -66,16 +67,37 @@ const AppLayout = () =>(WrappedComponent)=> {
         // console.log("New message")
         dispatch(incrementNotifications())
     },[dispatch])
+
     const refetchListener=useCallback((data)=>{
         console.log("Refetching")
         console.log(data)
         refetch()
         if(user._id.toString()==data.userId.toString()) navigate('/')
     },[refetch,navigate])
+
+    const onlineUsersListener =useCallback((data)=>{
+        console.log("onlineUsersListener ",data)
+        setOnlineUsers(data)
+    },[dispatch])
+    const UsersListener =(data)=>{
+        if(chatId && user._id && data)
+        {
+                console.log("UsersListener ",data,user._id.toString())
+                const mappedData=new Map(data)
+                const pair=mappedData.get(chatId.toString())
+
+                // const myFriend=pair && pair.filter((x)=>x!=user._id.toString())
+            console.log("Setting online users ",mappedData,pair)
+            if(pair && pair.length>0)
+                setOnlineUsers(pair)
+        }
+    }
+    socket.on(ONLINE_USERS,UsersListener)
     const eventHandlers={
         [NEW_MESSAGE_ALERT]:newMessageAlertHandler,
         [NEW_REQUEST]:newRequestListener, 
-        [REFETCH_CHATS]:refetchListener 
+        [REFETCH_CHATS]:refetchListener,
+        // [ONLINE_USERS]:onlineUsersListener
     }   
       
     useSocketEvents(socket,eventHandlers)
@@ -92,7 +114,7 @@ const AppLayout = () =>(WrappedComponent)=> {
                     // Hamburger/Menubar icon
                     <Drawer open={isMobile} onClose={handleMobileClose}>
                         <ChatList w="70vw" chats={data?.chats} chatId={chatId} handleDeleteChat={handleDeleteChat}
-                        newMessagesAlert={newMessagesAlert}/>
+                        newMessagesAlert={newMessagesAlert} onlineUsers={onlineUsers}/>
                     </Drawer>
                 )
             }
@@ -109,7 +131,7 @@ const AppLayout = () =>(WrappedComponent)=> {
                     {
                         isLoading? (<Skeleton/>):
                         (<ChatList chats={data?.chats} chatId={chatId} handleDeleteChat={handleDeleteChat}
-                            newMessagesAlert={newMessagesAlert}/>)
+                            newMessagesAlert={newMessagesAlert} onlineUsers={onlineUsers}/>)
                     }
                 </Grid>
 

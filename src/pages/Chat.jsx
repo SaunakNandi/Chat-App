@@ -7,21 +7,20 @@ import { InputBox } from '../components/styles/StyledComponent'
 import { FileMenu } from '../components/FileMenu'
 import MessageComponent from '../components/shared/MessageComponent'
 import { getSocket } from '../socket'
-import { ALERT, NEW_MESSAGE, START_TYPING, STOP_TYPING } from '../constants/events'
+import { ALERT, CHAT_JOINED, CHAT_LEAVED, NEW_MESSAGE, START_TYPING, STOP_TYPING } from '../constants/events'
 import { useChatDetailsQuery, useGetMessagesQuery } from '../redux/api/api.js'
 import { useErrors, useSocketEvents } from '../hooks/hook.jsx'
 import { useInfiniteScrollTop } from '6pp'
-import { useDispatch } from 'react-redux'
 import { setIsFileMenu } from '../redux/reducers/misc.js'
 import { removeNewMessagesAlert } from '../redux/reducers/chat.js'
 import { TypingLoader } from '../components/layout/Loader.jsx'
 import { useNavigate } from 'react-router-dom'
-
+import { useSelector,useDispatch } from 'react-redux'
 
 // See the return statement to understand how Chat is getting called and chatId is comming
 const Chat = ({chatId,user}) => {
   const containerRef=useRef(null)
-  // const fileMenuRef=useRef(null)
+  const dispatch=useDispatch()
   const [message,setMessage]=useState("")
   const [messages,setMessages]=useState([])
   const [fileMenuAnchor,setFileMenuAnchor]=useState(null)
@@ -29,12 +28,11 @@ const Chat = ({chatId,user}) => {
   const [IamTyping,setIamTyping]=useState(false)
   const [userTyping,setUserTyping]=useState(false)
   const typingTimeOut=useRef(null)
-  const socket=getSocket()
-  const dispatch=useDispatch()
   const navigate=useNavigate()
   const chatDetails=useChatDetailsQuery({chatId,skip:!chatId})  // only call when chatId is there
   const oldMessagesChunk=useGetMessagesQuery({chatId,page})
   const members=chatDetails?.data?.chat?.members
+  const socket=getSocket()
   const bottomRef=useRef(null)
   
   const handleFileOpen=(e)=>{
@@ -66,16 +64,32 @@ const Chat = ({chatId,user}) => {
   }
 
   useEffect(()=>{
+    // console.log("userId ",user._id)
+    // console.log("members ",members)
+    socket.emit(CHAT_JOINED,{userId:user._id,members,chatId})
     dispatch(removeNewMessagesAlert(chatId))
+    console.log("ChatId ",chatId)
     // when the chatId changes it trigger the useEffect and before the useEffect do its work the return statement is executed
     return()=>{
       setMessages([])
       setMessage("")
       setPage(1)
       setOldMessages([])
+      socket.emit(CHAT_LEAVED,{userId:user._id,members,chatId})
     }
-  },[chatId])
+  },[chatId,members])
   
+  // if you are not a part of the group you are trying to look
+  useEffect(()=>{
+    console.log("Chat Details ",chatDetails)
+    if(chatDetails.isError) return navigate('/')
+  },[chatDetails.isError])
+
+  useEffect(()=>{
+    if(bottomRef.current)
+      bottomRef.current.scrollIntoView({behavior:"smooth"})
+  },[messages])
+
   const messageOnChange=(e)=>{
     setMessage(e.target.value)
     if(!IamTyping)
@@ -91,16 +105,6 @@ const Chat = ({chatId,user}) => {
     },[2000])
   }
 
-  // if you are not a part of the group you are trying to look
-  useEffect(()=>{
-    console.log("Chat Details ",chatDetails)
-    if(chatDetails.isError) return navigate('/')
-  },[chatDetails.isError])
-
-  useEffect(()=>{
-    if(bottomRef.current)
-      bottomRef.current.scrollIntoView({behavior:"smooth"})
-  },[messages])
 
   const newMessagesListner=useCallback((data)=>{
     //  console.log(data)  
