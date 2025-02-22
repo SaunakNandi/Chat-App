@@ -5,7 +5,7 @@ import AvatarCard from './AvatarCard'
 import {motion} from 'framer-motion'
 
 const ChatItem = ({avatar=[],name,_id,groupChat=false,lastMsg,
-    sameSender,isOnline,newMessageAlert,index=1,handleDeleteChat}) => {
+    sameSender,isOnline,newMessageAlert,index=0.01,handleDeleteChat}) => {
         // console.log(newMessageAlert)
   return (
     <Link to={`/chat/${_id}`} onContextMenu={(e)=>handleDeleteChat(e,_id,groupChat)}
@@ -15,7 +15,7 @@ const ChatItem = ({avatar=[],name,_id,groupChat=false,lastMsg,
         <motion.div 
         initial={{ opacity: 0,y:"-100%" }}
         whileInView={{ opacity: 1,y:0 }}
-        transition={{delay:index*0.1}}
+        transition={{delay:0.5}}
         style={{
             display: 'flex',
             gap:'1rem',

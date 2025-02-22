@@ -1,7 +1,7 @@
 import { Dialog, DialogTitle, ListItem, Stack, Typography, Avatar, Button, Skeleton } from '@mui/material'
 import React, { memo } from 'react'
 import { useAcceptFriendRequestMutation, useGetNotificationsQuery } from '../../redux/api/api'
-import { useErrors } from '../../hooks/hook'
+import { useAsyncMutation, useErrors } from '../../hooks/hook'
 import { useDispatch, useSelector } from 'react-redux'
 import { setIsNotification } from '../../redux/reducers/misc'
 import toast from 'react-hot-toast'
@@ -9,28 +9,13 @@ const NotificationsBell = () => {
 
   // data will get this from server json({success:true,request:all_requests})
   const {isLoading,data,error,isError}=useGetNotificationsQuery()
-  const [acceptRequest]=useAcceptFriendRequestMutation()
+  const [acceptRequest]=useAsyncMutation(useAcceptFriendRequestMutation)
   const {isNotification}=useSelector(state=>state.misc)
   const dispatch = useDispatch()
-
   // this can be put in hook.js also like useAsyncMutation(useSendFriendRequestMutation)
   async function frndReqHandler({_id,accept}){
-    try {
-      // after accept request that perticular notification will get deleted because in server we have done 
-      // request.deleteOne()
-      const res=await acceptRequest({requestId:_id,accept})
-      if(res.data?.success)
-      {
-        toast.success(res.data.message)
-
-      }
-      else{
-        console.error(error)
-        toast.error(error || "Notification not found")
-      }
-    } catch (error) {
-      console.error(error)
-    }
+    dispatch(setIsNotification(false))
+    await acceptRequest("Accepting... ",{requestId:_id,accept})
   }
   const closeHandler=()=>{
     dispatch(setIsNotification(false))
