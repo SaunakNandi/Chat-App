@@ -155,13 +155,14 @@ const getMyFriends=async(req,res)=>{
     const {chatId}=req.query
     const chats=await Chat.find({members:req.user,groupChat:false}).populate('members','name avatar')
     let friends=chats.map(({members})=>{
-        const otherUser=getOtherMember(members,req.user)
+        const otherUser=getOtherMember(members,req.user) // in members[] it has the friend's_id and authenticated user's_id. So I need only my friend's_id
         return {
             _id:otherUser._id,
             name:otherUser.name,
             avatar:otherUser.avatar.url
         }
     })
+    // we did this to remove duplicates if any
     friends=Array.from(new Map(friends.map((x)=> [x._id.toString(),x])).values())
     // console.log("my friends ",friends)
     if(chatId)

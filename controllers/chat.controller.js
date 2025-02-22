@@ -5,7 +5,6 @@ import {Message} from '../models/message.models.js'
 import { deleteFilesFromCloudinary, emitEvent, uploadFilesToCloudinary } from "../utils/features.js"
 import { ALERT, NEW_ATTACHMENT, NEW_MESSAGE, NEW_MESSAGE_ALERT, REFETCH_CHATS } from "../constants/events.js"
 import { getOtherMember } from "../lib/helper.lib.js"
-import { attachmentsMulter } from "../middlewares/multer.js"
 
 const newGroupChat=async(req,res,next)=>{
     const {name,members}=req.body
@@ -129,6 +128,7 @@ const removeMembers = async function(req,res,next){
 }
 
 const leaveGroup=async(req,res,next)=>{
+    console.log("leave group")
     const chatId=req.params.id
     const chat=await Chat.findById(chatId)
     if(!chat) return next(new ErrorHandler('Not in your friend list',404))
@@ -143,11 +143,10 @@ const leaveGroup=async(req,res,next)=>{
     }
     chat.members=remainingMembers
     const [user]=await Promise.all([User.findById(req.user,"name"),chat.save()])  
-    emitEvent(req,ALERT,chat.members,`${user.name} has left the group`)
-    // emitEvent(req,REFETCH_CHATS,chat.members,``)
+    emitEvent(req,ALERT,chat.members,{message:`${userToRemove.name} has been removed from the group`,chatId})
     return res.status(201).json({
         sucess:true,
-        messsage:"Someone left the group"    
+        messsage:"Left the group"    
     })
 }
 
@@ -240,6 +239,7 @@ const deleteChat = async function(req,res,next){
         if(chat.groupChat && chat.creator.toString()!==req.user.toString()) 
             return next(new ErrorHandler('You are not allowed to delete the group',403))
 
+        const members=chat.members
         // not present in the group
         if(!chat.groupChat && !chat.members.includes(req.user.toString()))
             return next(new ErrorHandler('You are not allowed to delete the chat',403))
@@ -264,7 +264,10 @@ const deleteChat = async function(req,res,next){
             chat.deleteOne(),
             Message.deleteMany({chat:chatId})
         ])
-        emitEvent(req,REFETCH_CHATS,chat.members)
+        // console.log("members ",members)
+        const chat2=await Chat.findById(chatId)
+        
+        emitEvent(req,REFETCH_CHATS,members)
         return res.status(201).json({
             sucess:true,
             message:"Chat deleted successfully"
