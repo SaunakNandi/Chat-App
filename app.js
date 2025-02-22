@@ -9,7 +9,7 @@ import { errorMiddleware } from './middlewares/error.js'
 import cookieParser from 'cookie-parser'
 import { Server } from 'socket.io'
 import {createServer} from 'http'
-import { NEW_MESSAGE, NEW_MESSAGE_ALERT, START_TYPING, STOP_TYPING } from './constants/events.js'
+import { CHAT_JOINED, CHAT_LEAVED, NEW_MESSAGE, NEW_MESSAGE_ALERT, ONLINE_USERS, START_TYPING, STOP_TYPING } from './constants/events.js'
 import {v4 as uuid} from 'uuid'
 import { getSockets } from './lib/helper.lib.js'
 import { Message } from './models/message.models.js'
@@ -40,6 +40,9 @@ const server=createServer(app);
 const io=new Server(server,{cors:corsOptions})
 app.set('io',io)
 const userSocketIDs=new Map()   // it will contains all the users connected to the socket
+const chatBuddy=new Map()
+const onlineUsers=new Set()
+let otherMemberJoined=null
 
 app.use(cors(corsOptions))
 // app.use(cors())
@@ -62,8 +65,9 @@ io.use((socket,next)=>{
 
 // waiting for the event to get fired from socket.jsx in client side
 io.on('connection',(socket)=>{
-    console.log('User connected')
     const user=socket.user
+    console.log('User connected ',user._id,user.name)
+    onlineUsers.add(user._id.toString())
     userSocketIDs.set(user._id.toString(),socket.id)  // keeping track of the user._id connected to the socket.id
     // console.log("userSocketIDs ",userSocketIDs)
     // getting {chatId,members,message} from frontend(check pages/Chat.jsx)
@@ -114,9 +118,46 @@ io.on('connection',(socket)=>{
             socket.to(membersSockets).emit(STOP_TYPING,{chatId})
         }
     })
+
+    socket.on(CHAT_JOINED,({userId,members,chatId})=>{
+        if(members)
+        {
+            console.log("members ",members,chatId)
+            otherMemberJoined=members.find((x)=> x.toString()!==userId.toString())
+            console.log("other member joined ",otherMemberJoined)
+            if(onlineUsers.has(otherMemberJoined.toString()))
+                chatBuddy.set(chatId.toString(),[otherMemberJoined.toString(),userId.toString()])
+            console.log("chat buddy ",chatBuddy)
+        }
+        else 
+            chatBuddy.set(chatId.toString(),userId.toString())
+        const membersSocket=getSockets(members)
+        io.to(membersSocket).emit(ONLINE_USERS,Array.from(chatBuddy))
+    })
+    socket.on(CHAT_LEAVED,({userId,members,chatId})=>{
+        console.log("chatId ",chatId)
+        if(otherMemberJoined && chatBuddy.has(chatId.toString()))
+        {
+            chatBuddy.delete(chatId.toString())
+            // onlineUsers.delete(otherMemberJoined.toString())
+        }
+        else if(chatBuddy.has(chatId.toString()))
+            chatBuddy.delete(userId.toString())
+        console.log("After Deletion ",chatBuddy)
+        const membersSocket=getSockets(members)
+        io.to(membersSocket).emit(ONLINE_USERS,Array.from(chatBuddy))
+    })
     socket.on('disconnect',()=>{
-        console.log('User disconnected')
+        console.log('User disconnected ',user.name)
+        if(otherMemberJoined)
+        {
+            chatBuddy.delete(otherMemberJoined.toString())
+            onlineUsers.delete(otherMemberJoined.toString())
+        }
+        else
+            chatBuddy.delete(user._id.toString())
         userSocketIDs.delete(user._id.toString())
+        socket.broadcast.emit(ONLINE_USERS,Array.from(chatBuddy))
     })
 })
 
