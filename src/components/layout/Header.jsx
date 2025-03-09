@@ -1,5 +1,5 @@
 import { AppBar, Backdrop, Box, IconButton, Toolbar, Typography } from '@mui/material'
-import React, { lazy, Suspense, useState } from 'react'
+import React, { lazy, Suspense } from 'react'
 import { orange } from '../../constants/Color'
 import { Add as AddIcon, Group as GroupIcon, Menu as MenuIcon, Search as SearchIcon, Logout as LogoutIcon, 
     Notifications as NotificationsIcon } from '@mui/icons-material'
