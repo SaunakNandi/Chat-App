@@ -73,11 +73,12 @@ const Login = () => {
       dispatch(userExists(data.user))
       toast.success(data.message)
     }  catch (error) {
-      toast.error(error?.response?.data?.message || "Something Went Wrong", {
+      toast.error(error?.response?.data?.message || "Login Problem from server", {
         id: toastId,
       });
     } finally {
       setIsLoading(false);
+      toast.dismiss(toastId)
     }
   }
   return (

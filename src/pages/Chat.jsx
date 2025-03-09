@@ -60,6 +60,10 @@ const Chat = ({chatId,user}) => {
     // NOTE 3 - Why NEW_MESSAGE is listned in server but not in client when emitted from here
     // Emitting message to the server
     socket.emit(NEW_MESSAGE,{chatId,members,message})
+
+    // When you send the message the scrollbar should comedown
+    if(bottomRef.current)
+      bottomRef.current.scrollIntoView({behavior:"smooth"})
     setMessage("")
   }
 
@@ -84,11 +88,6 @@ const Chat = ({chatId,user}) => {
     console.log("Chat Details ",chatDetails)
     if(chatDetails.isError) return navigate('/')
   },[chatDetails.isError])
-
-  useEffect(()=>{
-    if(bottomRef.current)
-      bottomRef.current.scrollIntoView({behavior:"smooth"})
-  },[messages])
 
   const messageOnChange=(e)=>{
     setMessage(e.target.value)
@@ -168,7 +167,10 @@ const Chat = ({chatId,user}) => {
             <MessageComponent message={msg} user={user} key={msg._id}/>
           ))
         }
-        {userTyping && <TypingLoader/>}
+        {userTyping && <TypingLoader ref={bottomRef}/>}
+
+        {/* Scroll bar should come down when you have sent a message */}
+        <div ref={bottomRef}></div>
         
       </Stack>
       <form style={{ height:'10%'}} onSubmit={sendMessage}>

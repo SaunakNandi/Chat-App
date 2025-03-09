@@ -8,7 +8,7 @@ import AvatarCard from '../components/shared/AvatarCard'
 import { samplechats, sampleUsers } from '../constants/sample_data'
 import AddMemberDialog from '../components/AddMemberDialog'
 import UserItem from '../components/shared/UserItem'
-import { useAddGroupMemberMutation, useChatDetailsQuery, useDeleteChatMutation, useMyGroupsQuery, useRemoveGroupMemberMutation, useRenameGroupMutation } from '../redux/api/api'
+import { useChatDetailsQuery, useDeleteChatMutation, useMyGroupsQuery, useRemoveGroupMemberMutation, useRenameGroupMutation } from '../redux/api/api'
 import { Loader } from '../components/layout/Loader'
 import { useAsyncMutation, useErrors } from '../hooks/hook'
 import { useDispatch, useSelector } from 'react-redux'
@@ -31,7 +31,7 @@ const Groups = () => {
   const chatId=useSearchParams()[0].get('group')
   const myGroups=useMyGroupsQuery("")
   const groupDetails=useChatDetailsQuery({chatId,populate:true},{skip:!chatId}) // fetch only when chatId is there
-  // console.log(groupDetails?.data)
+  console.log(groupDetails?.data)
   
   const errors=[
     {
@@ -179,7 +179,7 @@ const Groups = () => {
         padding:'1rem 3rem'
       }}>
         {IconBtns}
-        {GroupName && (
+        { groupDetails?.data && (
           <>
             {GroupName}
 
@@ -253,8 +253,9 @@ const GroupsList=({w="100%",myGroups=[],chatId})=>{
   return (
     <Stack width={w} sx={{backgroundColor:'bisque',height:'100vh',overflow:'auto'}}>
       {
-        myGroups.length>0 ? myGroups.map((group)=><GroupListItem group={group} chatId={chatId} key={group._id}/>):(
-          <Typography textAlign={'center'} padding={'1rem'}>No groups</Typography>
+        myGroups.length>0 ? myGroups.map((group)=> <GroupListItem group={group} chatId={chatId} key={group._id}/>):(
+          <Typography textAlign={'center'} padding={'1rem'} fontSize={'30px'} 
+          fontWeight={'bold'}>You are not the admin of any group</Typography>
         )
       }
     </Stack>
