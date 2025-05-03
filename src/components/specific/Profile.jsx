@@ -3,7 +3,11 @@ import React from 'react'
 import { Face as FaceIcon, AlternateEmail as UsernameIcon, CalendarMonth as CalendarIcon } from '@mui/icons-material'
 import moment from 'moment'
 import { transformImage } from '../lib/Feature'
-const Profile = ({user}) => {
+import { useFriendsDetailsQuery } from '../../redux/api/api'
+const Profile = ({user,friendsID}) => {
+  console.log(friendsID)
+  const friendsDetails=useFriendsDetailsQuery(friendsID)
+  console.log("friendsDetails ",friendsDetails)
   return (
     <Stack spacing={'2rem'} direction={'column'} alignItems={"center"}>
       <Avatar sx={{
@@ -13,11 +17,11 @@ const Profile = ({user}) => {
         objectFit:'contain',
         marginBottom:'1rem'
       }}
-      src={transformImage(user?.avatar?.url)}/>
-      <ProfileCard heading={'Bio'} text={user?.bio}/>
-      <ProfileCard heading={'Username'} text={user?.username} Icon={<UsernameIcon/>}/>
-      <ProfileCard heading={'Joined'} text={moment(user?.createdAt).fromNow()} Icon={<CalendarIcon/>}/>
-      <ProfileCard heading={'Name'} text={user?.name} Icon={<FaceIcon/>}/>
+      src={transformImage(friendsDetails.data.friendsData?.avatar?.url)}/>
+      <ProfileCard heading={'Bio'} text={friendsDetails.data.friendsData?.bio}/>
+      <ProfileCard heading={'Username'} text={friendsDetails.data.friendsData?.username} Icon={<UsernameIcon/>}/>
+      <ProfileCard heading={'Joined'} text={moment(friendsDetails.data.friendsData?.createdAt).fromNow()} Icon={<CalendarIcon/>}/>
+      <ProfileCard heading={'Name'} text={friendsDetails.data.friendsData?.name} Icon={<FaceIcon/>}/>
     </Stack>
   )
 }

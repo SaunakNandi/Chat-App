@@ -26,12 +26,20 @@ const api=createApi({
         // invalidateTags:["Chat"] // refetching to load chats for new added friend
 
         searchUser:builder.query({
-            query:(name)=>(
+            query:(name,id)=>(
                 {
-                    url:`user/search?name=${name}`,
+                    url:`user/search?name=${name}&id=${id}`,
                     credentials:"include"
                 }
             ),
+            providesTags:["User"]
+        }),
+
+        friendsDetails:builder.query({
+            query:(id)=>({
+                url:`user/getDetails?id=${id}`,
+                credentials:"include",
+            }),
             providesTags:["User"]
         }),
 
@@ -175,5 +183,4 @@ console.log(api.endpoints?.acceptFriendRequest) // to about the hooks created fo
 
 export default api
 export const {useMyChatsQuery,useLazySearchUserQuery,useSendFriendRequestMutation,useGetNotificationsQuery,
-    useAcceptFriendRequestMutation,useChatDetailsQuery,useGetMessagesQuery, useSendAttachmentsMutation, useMyGroupsQuery,useAvailableFriendsQuery,useNewGroupMutation,useRenameGroupMutation,useRemoveGroupMemberMutation,useAddGroupMemberMutation,
-    useDeleteChatMutation,useLeaveGroupMutation}=api
+    useAcceptFriendRequestMutation,useChatDetailsQuery,useGetMessagesQuery, useSendAttachmentsMutation, useMyGroupsQuery,useAvailableFriendsQuery,useNewGroupMutation,useRenameGroupMutation,useRemoveGroupMemberMutation,useAddGroupMemberMutation,useFriendsDetailsQuery,useDeleteChatMutation,useLeaveGroupMutation}=api

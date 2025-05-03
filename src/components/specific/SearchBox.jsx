@@ -11,6 +11,7 @@ const SearchBox = () => {
   const search = useInputValidation('')
   const dispatch=useDispatch()
   const {isSearch}=useSelector((state)=>state.misc)
+  const {user}=useSelector((state)=>state.auth)
   const [users,setUsers]=useState([])
   const [searchUser]=useLazySearchUserQuery()
   const [sendFrndReq,isLoadingSendFriendReq]=useAsyncMutation(useSendFriendRequestMutation)
@@ -23,7 +24,8 @@ const SearchBox = () => {
 
   useEffect(()=>{
     const timeOutId=setTimeout(()=>{
-      searchUser(search.value)
+      console.log('my user_id is',user._id)
+      searchUser(search.value,user._id)
       .then(({data})=>{
         // console.log(data)
         setUsers(data.users)

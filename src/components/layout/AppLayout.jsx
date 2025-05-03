@@ -6,7 +6,7 @@ import ChatList from '../specific/ChatList'
 // import { samplechats } from '../../constants/sample_data'
 import { useNavigate, useParams } from 'react-router-dom'
 import Profile from '../specific/Profile'
-import { useMyChatsQuery } from '../../redux/api/api'
+import { useMyChatsQuery, useChatDetailsQuery } from '../../redux/api/api'
 import { Drawer, Skeleton } from '@mui/material'
 import { useDispatch, useSelector } from 'react-redux'
 import { setIsDeletemenu, setIsMobile, setSelectedDeleteChat } from '../../redux/reducers/misc'
@@ -17,7 +17,10 @@ import { incrementNotifications, setNewMessagesAlert } from '../../redux/reducer
 import { useSocketEvents } from '../../hooks/hook'
 import { getOrSaveFromStorage } from '../lib/Feature.js'
 import DeleteChatMenu from '../DeleteChatMenu.jsx'
+
 // HOC
+// AppLayout is an arrow function that returns another function (WrappedComponent) => {}.
+
 const AppLayout = () =>(WrappedComponent)=> {
   return (props)=>{
     const socket=getSocket()
@@ -30,13 +33,11 @@ const AppLayout = () =>(WrappedComponent)=> {
     const {newMessagesAlert}=useSelector((state)=>state.chat)
     const navigate=useNavigate()
     const [onlineUsers,setOnlineUsers]=useState([])
-    // useMyChatsQuery returns an object that includes data.
-    // {
-    //     data,         // The fetched chat data (or undefined if still loading)
-    //     isLoading,    // Boolean: true while fetching
-    //     error,        // Contains error details if the request fails
-    //     refetch       // Function to manually refetch data
-    //   }
+    const chatDetails=useChatDetailsQuery({chatId,skip:!chatId})  // only call when chatId is there
+    console.log("chatDetails,chatId",chatDetails,chatId)
+    const members=chatDetails?.data?.chat?.members
+    const friendsID=members && members.filter((x)=>x!=user._id)
+    console.log("friendsID",friendsID && friendsID[0])
     const {isLoading,data,isError,error,refetch}=useMyChatsQuery("")
     console.log(data)
     const deleteMenuAnchor=useRef(null)
@@ -82,12 +83,12 @@ const AppLayout = () =>(WrappedComponent)=> {
     const UsersListener =(data)=>{
         if(chatId && user._id && data)
         {
-                console.log("UsersListener ",data,user._id.toString())
+                // console.log("UsersListener ",data,user._id.toString())
                 const mappedData=new Map(data)
                 const pair=mappedData.get(chatId.toString())
 
                 // const myFriend=pair && pair.filter((x)=>x!=user._id.toString())
-            console.log("Setting online users ",mappedData,pair)
+            // console.log("Setting online users ",mappedData,pair)
             if(pair && pair.length>0)
                 setOnlineUsers(pair)
         }
@@ -121,8 +122,7 @@ const AppLayout = () =>(WrappedComponent)=> {
 
             <Grid container sx={{
                     height: "calc(100vh - 4rem)", // Use sx for styles
-                }}
-            >
+                }}>
                 <Grid item size={{ xs: 0, md: 3 }} 
                     sx={{
                         height: "100%",
@@ -152,7 +152,7 @@ const AppLayout = () =>(WrappedComponent)=> {
                         bgcolor: "rgba(90, 88, 88, 0.85)",
                     }}
                 >
-                    <Profile user={user}/>
+                    { friendsID && <Profile user={user} friendsID={friendsID[0]}/>}
                 </Grid>
             </Grid>
         </>
