@@ -2,10 +2,11 @@ import { compare } from 'bcrypt'
 import {User} from '../models/user.models.js'
 import {Chat} from '../models/chat.models.js'
 import {Request} from '../models/request.models.js'
-import { cookieOption, emitEvent, sendToken, uploadFilesToCloudinary } from '../utils/features.js'
+import { emitEvent, sendToken, uploadFilesToCloudinary } from '../utils/features.js'
 import { ErrorHandler } from '../utils/utility.js'
 import { NEW_REQUEST, REFETCH_CHATS } from '../constants/events.js'
 import { getOtherMember } from '../lib/helper.lib.js'
+import mongoose from 'mongoose'
 
 const login=async(req,res,next)=>{
     try {
@@ -69,18 +70,20 @@ const logout=async(req,res)=>{
 
 const searchUser=async(req,res)=>{
     //same as req.query.name
-    const {name=""}=req.query  //If name is not present in req.query, it defaults to an empty string ("").
+    const {name="",id}=req.query  //If name is not present in req.query, it defaults to an empty string ("").
     
     // finding all my connections
     const myChats=await Chat.find({groupChat:false,members:req.user})  // getting req.user from isAuthenticated
     const allUsersFromMyChats=myChats.flatMap((chat)=>chat.members)  // chat.members is an array itself
 
     // $regex is built-in property in mongoose. So suppose if name is Saunak and user search sau -> it will return user with name saunak and options "i" for case insensitive
+    console.log("allUsersFromMyChats",allUsersFromMyChats)
     const allUsersExceptMeandFriends=await User.find({
-        _id:{$nin:allUsersFromMyChats},
+        _id:{$nin:[...allUsersFromMyChats,new mongoose.Types.ObjectId(new Number(id))]},
         name:{$regex:name,$options:"i"}  
     })
-    // console.log("unknown peoples",allUsersExceptMeandFriends)
+
+    // console.log("allUsersExceptMeandFriends ",allUsersExceptMeandFriends)
     // avatar.url can be done from frontend also but we did it from here
     //modifying the response 
     const users=allUsersExceptMeandFriends.map(({_id,name,avatar})=>({_id,name,avatar:avatar.url}))
@@ -173,4 +176,18 @@ const getMyFriends=async(req,res)=>{
     }
     return res.status(200).json({success:true,friends})
 }
-export {login,newUser,getMyProfile,logout,searchUser,sendFrndReq,acceptFrndReq,getMyNotifications,getMyFriends}
+
+const getUserDetails=async(req,res)=>{
+    const {id}=req.query
+    console.log("users userId",id)
+    try {
+        const friendsData=await User.findById(id)
+        console.log("friendsData ",friendsData)
+        return res.status(200).json({success:true,friendsData})
+    } catch (error) {
+        console.log("Error at getUserDetails ",error)
+        // return res.status(500).jons({message:"Not able to get user data"})
+    }
+    
+}
+export {login,newUser,getMyProfile,logout,searchUser,sendFrndReq,acceptFrndReq,getMyNotifications,getMyFriends,getUserDetails}
