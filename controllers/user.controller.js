@@ -31,6 +31,7 @@ const newUser=async(req,res)=>{
         // console.log(req.body)
         const file=req.file
         if(!file) return next(new ErrorHandler('Please upload file',11000))
+            
         const isUsernameExist = await User.findOne({username})
         if(isUsernameExist) return next(new ErrorHandler('Username already exist',502))
         const result=await uploadFilesToCloudinary([file])
