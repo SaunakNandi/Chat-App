@@ -4,11 +4,10 @@ import { Face as FaceIcon, AlternateEmail as UsernameIcon, CalendarMonth as Cale
 import moment from 'moment'
 import { transformImage } from '../lib/Feature'
 import { useFriendsDetailsQuery } from '../../redux/api/api'
-const Profile = ({user,friendsID}) => {
-  console.log(friendsID)
+const Profile = ({friendsID}) => {
+  
   const friendsDetails=useFriendsDetailsQuery(friendsID)
-  console.log("friendsDetails ",friendsDetails)
-  return (
+  return friendsDetails?.data &&(
     <Stack spacing={'2rem'} direction={'column'} alignItems={"center"}>
       <Avatar sx={{
         width: 200,
@@ -17,7 +16,7 @@ const Profile = ({user,friendsID}) => {
         objectFit:'contain',
         marginBottom:'1rem'
       }}
-      src={transformImage(friendsDetails.data.friendsData?.avatar?.url)}/>
+      src={transformImage(friendsDetails.data?.friendsData?.avatar?.url)}/>
       <ProfileCard heading={'Bio'} text={friendsDetails.data.friendsData?.bio}/>
       <ProfileCard heading={'Username'} text={friendsDetails.data.friendsData?.username} Icon={<UsernameIcon/>}/>
       <ProfileCard heading={'Joined'} text={moment(friendsDetails.data.friendsData?.createdAt).fromNow()} Icon={<CalendarIcon/>}/>
