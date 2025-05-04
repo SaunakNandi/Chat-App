@@ -10,9 +10,13 @@ import { userExists } from '../redux/reducers/auth'
 import toast from 'react-hot-toast'
 import {server} from '../constants/config'
 
+const usernameRegex = /^[a-zA-Z0-9_]{4,16}$/; // Example: 4-16 chars, letters/numbers/underscore
+const passwordRegex = /^(?=.*[A-Z])(?=.*\d)[A-Za-z\d@$!%*?&]{6,}$/; // Example: 6+ chars, 1 upper, 1 number
+const nameRegex = /^[A-Za-z\\s]+$/;
 const Login = () => {
   const [isLogin, setIsLogin] = useState(true)
   const [isLoading, setIsLoading] = useState(false);
+  const [errors, setErrors] = useState(false);
   const name=useInputValidation("")
   const bio=useInputValidation("")
   const username=useInputValidation("",usernameValidator)
@@ -28,15 +32,29 @@ const Login = () => {
 }
   const handleSignup=async(e)=>{
     e.preventDefault()
+    console.log("sign up clicked")
+    const newError={}
+    const usernameVal=username.value.trim()
+    const passwordVal=password.value.trim()
+    const nameVal=name.value.trim()
+    if(!usernameRegex.test(usernameVal)) newError.username='Expects atleast 4 chars any of the following letters,numbers,underscore'
+    // if(passwordRegex.test(passwordVal)) newError.passwordVal='Expects more than 6+ characters, 1 upper, 1number or symbol'
+    if(!nameRegex.test(nameVal)) newError.name='Expects only letters with space allowed between name'
+    setErrors(newError)
+    if(Object.keys(newError).length>0) return
+
     const toastId = toast.loading("Signing Up...");
     setIsLoading(true);
+
     const formData=new FormData()
     formData.append('avatar',avatar.file)
-    formData.append('name',name.value)
+    formData.append('name',nameVal)
     formData.append('bio',bio.value)
-    formData.append('username',username.value)
-    formData.append('password',password.value)
+    formData.append('username',usernameVal)
+    formData.append('password',passwordVal)
+    console.log("FormData: " + formData)
 
+    
     try {
       const {data}=await axios.post(`${server}/api/v1/user/new`,formData,
       {
@@ -62,6 +80,12 @@ const Login = () => {
   
   const handleLogin=async(e)=>{
     e.preventDefault()
+    const newError={}
+    const usernameVal=username.value.trim()
+    if(!usernameRegex.test(usernameVal)) newError.username='Expects atleast 4 chars any of the following letters,numbers,underscore'
+
+    setErrors(newError)
+    if(Object.keys(newError).length>0) return
     const toastId = toast.loading("Logging In...");
     setIsLoading(true);
     try {
@@ -139,12 +163,18 @@ const Login = () => {
                   <TextField required label="Name" margin="normal" variant="outlined" fullWidth
                   value={name.value}
                   onChange={name.changeHandler}/>
+                  {
+                    errors.name && <Typography color="error" variant='caption'>{errors.name}</Typography>
+                  }
                   <TextField required label="Bio" margin="normal" variant="outlined" fullWidth
                   value={bio.value}
                   onChange={bio.changeHandler}/>
                   <TextField required label="Username" margin="normal" variant="outlined" fullWidth
                   value={username.value}
                   onChange={username.changeHandler}/>
+                  {
+                    errors.username && <Typography color="error" variant='caption'>{errors.username}</Typography>
+                  }
                   {
                     username.error && (
                       <Typography color="error" variant='caption'>{username.error}</Typography>
@@ -153,6 +183,9 @@ const Login = () => {
                   <TextField required label="Password" margin="normal" variant="outlined" fullWidth type="password"
                   value={password.value}
                   onChange={password.changeHandler}/>
+                  {
+                    errors.password && <Typography color="error" variant='caption'>{errors.password}</Typography>
+                  }
                   {
                     password.error && (
                       <Typography color="error" variant='caption'>{password.error}</Typography>

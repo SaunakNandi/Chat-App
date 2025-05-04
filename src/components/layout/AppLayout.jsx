@@ -141,8 +141,11 @@ const AppLayout = () =>(WrappedComponent)=> {
                     }}
                 >
                     {/* Chat component can be accessed from this WrappedComponent */}
-                    {console.log({...props})}
-                    <WrappedComponent {...props} chatId={chatId} user={user}/>
+                    {
+                        chatDetails &&  
+                        <WrappedComponent  // {...props} 
+                        chatId={chatId} user={user} chatDetails={chatDetails}/>
+                    }
                 </Grid>
 
                 <Grid item md={4} lg={3} size={{ md: 4, lg:3 }} sx={{
@@ -152,7 +155,7 @@ const AppLayout = () =>(WrappedComponent)=> {
                         bgcolor: "rgba(90, 88, 88, 0.85)",
                     }}
                 >
-                    { friendsID && <Profile user={user} friendsID={friendsID[0]}/>}
+                    { friendsID && <Profile friendsID={friendsID[0]}/>}
                 </Grid>
             </Grid>
         </>

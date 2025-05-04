@@ -41,13 +41,16 @@ const Header = () => {
     }
     const logoutHandler=async()=>{
         // Logout logic here
+
+//       withCredentials- ✅ Allows sending & receiving cookies (useful for authentication).
+// ✅ Needed for sessions & JWT tokens when working with CORS requests.
         try {
             const {data}=await axios.get(`${server}/api/v1/user/logout`,{
                 withCredentials:true,
             })
-            navigate('/login')
             dispatch(userNotExists())
             toast.success(data.message)
+            navigate('/login')
         } catch (error) {
             console.error(error)
             toast.error(error?.response?.data?.message || "Logout not working")

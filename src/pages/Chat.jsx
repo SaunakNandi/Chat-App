@@ -8,17 +8,17 @@ import { FileMenu } from '../components/FileMenu'
 import MessageComponent from '../components/shared/MessageComponent'
 import { getSocket } from '../socket'
 import { ALERT, CHAT_JOINED, CHAT_LEAVED, NEW_MESSAGE, START_TYPING, STOP_TYPING } from '../constants/events'
-import { useChatDetailsQuery, useGetMessagesQuery } from '../redux/api/api.js'
+import { useGetMessagesQuery } from '../redux/api/api.js'
 import { useErrors, useSocketEvents } from '../hooks/hook.jsx'
 import { useInfiniteScrollTop } from '6pp'
 import { setIsFileMenu } from '../redux/reducers/misc.js'
 import { removeNewMessagesAlert } from '../redux/reducers/chat.js'
 import { TypingLoader } from '../components/layout/Loader.jsx'
 import { useNavigate } from 'react-router-dom'
-import { useSelector,useDispatch } from 'react-redux'
+import { useDispatch } from 'react-redux'
 
 // See the return statement to understand how Chat is getting called and chatId is comming
-const Chat = ({chatId,user}) => {
+const Chat = ({chatId,user,chatDetails}) => {
   const containerRef=useRef(null)
   const dispatch=useDispatch()
   const [message,setMessage]=useState("")
@@ -29,7 +29,6 @@ const Chat = ({chatId,user}) => {
   const [userTyping,setUserTyping]=useState(false)
   const typingTimeOut=useRef(null)
   const navigate=useNavigate()
-  const chatDetails=useChatDetailsQuery({chatId,skip:!chatId})  // only call when chatId is there
   const oldMessagesChunk=useGetMessagesQuery({chatId,page})
   const members=chatDetails?.data?.chat?.members
   const socket=getSocket()
@@ -72,7 +71,7 @@ const Chat = ({chatId,user}) => {
     // console.log("members ",members)
     socket.emit(CHAT_JOINED,{userId:user._id,members,chatId})
     dispatch(removeNewMessagesAlert(chatId))
-    console.log("ChatId ",chatId)
+    console.log("about chat ",chatDetails,"members",members)
     // when the chatId changes it trigger the useEffect and before the useEffect do its work the return statement is executed
     return()=>{
       setMessages([])
@@ -85,7 +84,6 @@ const Chat = ({chatId,user}) => {
   
   // if you are not a part of the group you are trying to look
   useEffect(()=>{
-    console.log("Chat Details ",chatDetails)
     if(chatDetails.isError) return navigate('/')
   },[chatDetails.isError])
 
@@ -202,4 +200,5 @@ const Chat = ({chatId,user}) => {
   )
 }
 
+// AppLayout will get called whenever Chat is called on /chat/:chatId
 export default AppLayout()(Chat)
