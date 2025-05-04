@@ -72,16 +72,17 @@ const logout=async(req,res)=>{
 
 const searchUser=async(req,res)=>{
     //same as req.query.name
-    const {name="",id}=req.query  //If name is not present in req.query, it defaults to an empty string ("").
-    
+    const {name="",id=""}=req.query  //If name is not present in req.query, it defaults to an empty string ("").
+    console.log("my id ",typeof id)
     // finding all my connections
     const myChats=await Chat.find({groupChat:false,members:req.user})  // getting req.user from isAuthenticated
     const allUsersFromMyChats=myChats.flatMap((chat)=>chat.members)  // chat.members is an array itself
-
     // $regex is built-in property in mongoose. So suppose if name is Saunak and user search sau -> it will return user with name saunak and options "i" for case insensitive
-    console.log("allUsersFromMyChats",allUsersFromMyChats)
+    // console.log("allUsersFromMyChats",allUsersFromMyChats)
+    const currentUserObjectId = new mongoose.Types.ObjectId(String(id));  // converting to string for VScode warning
+    const nottoConsiderThoseids=allUsersFromMyChats.length?[...allUsersFromMyChats,currentUserObjectId]:[currentUserObjectId]
     const allUsersExceptMeandFriends=await User.find({
-        _id:{$nin:[...allUsersFromMyChats,new mongoose.Types.ObjectId(new Number(id))]},
+        _id:{$nin:nottoConsiderThoseids},
         name:{$regex:name,$options:"i"}  
     })
 
