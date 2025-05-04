@@ -30,17 +30,18 @@ const Groups = () => {
   const [groupNameUpdatedValue,setGroupNameUpdatedValue]=useState('')
   const chatId=useSearchParams()[0].get('group')
   const myGroups=useMyGroupsQuery("")
-  const groupDetails=useChatDetailsQuery({chatId,populate:true},{skip:!chatId}) // fetch only when chatId is there
+  console.log(chatId)
+  let groupDetails=useChatDetailsQuery({chatId,populate:true},{skip:!chatId}) // fetch only when chatId is there
   console.log(groupDetails?.data)
   
   const errors=[
     {
-      isError:myGroups.isError,
-      error:myGroups.error,
+      isError:myGroups?.isError,
+      error:myGroups?.error,
     },
     {
-      isError:groupDetails.isError,
-      error:groupDetails.error,
+      isError:groupDetails?.isError,
+      error:groupDetails?.error,
     }
   ]
   useErrors(errors)
@@ -58,7 +59,7 @@ const Groups = () => {
       setMembers([]);
       setIsEdit(false);
     };
-  },[groupDetails.data])
+  },[groupDetails?.data])
 
   const handleMobile=()=>{
     setIsMobileMenuOpen(prev=>!prev)

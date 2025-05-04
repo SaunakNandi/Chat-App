@@ -26,12 +26,13 @@ const api=createApi({
         // invalidateTags:["Chat"] // refetching to load chats for new added friend
 
         searchUser:builder.query({
-            query:(name,id)=>(
-                {
+            query:({name,id})=>{
+                console.log("searchUser ",id)
+                return ({
                     url:`user/search?name=${name}&id=${id}`,
                     credentials:"include"
-                }
-            ),
+                })
+            },
             providesTags:["User"]
         }),
 

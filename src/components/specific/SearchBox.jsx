@@ -24,13 +24,14 @@ const SearchBox = () => {
 
   useEffect(()=>{
     const timeOutId=setTimeout(()=>{
-      console.log('my user_id is',user._id)
-      searchUser(search.value,user._id)
+      // RTK Query's lazy queries accept only one argument, not multiple positional arguments. So when you pass two arguments, only the first (search.value) is passed, and the second (user._id) is ignored
+      searchUser({ name: search.value, id: user._id })
       .then(({data})=>{
-        // console.log(data)
-        setUsers(data.users)
+        console.log(data)
+        if(data)
+          setUsers(data.users)
     }).catch((e)=>console.error(e))
-    },1000)
+    },400)
     return ()=>{
       clearTimeout(timeOutId)
     }

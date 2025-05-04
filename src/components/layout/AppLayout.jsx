@@ -33,7 +33,9 @@ const AppLayout = () =>(WrappedComponent)=> {
     const {newMessagesAlert}=useSelector((state)=>state.chat)
     const navigate=useNavigate()
     const [onlineUsers,setOnlineUsers]=useState([])
-    const chatDetails=useChatDetailsQuery({chatId,skip:!chatId})  // only call when chatId is there
+    let chatDetails
+    if(chatId)
+        chatDetails=useChatDetailsQuery({chatId,skip:!chatId})  // only call when chatId is there
     console.log("chatDetails,chatId",chatDetails,chatId)
     const members=chatDetails?.data?.chat?.members
     const friendsID=members && members.filter((x)=>x!=user._id)
