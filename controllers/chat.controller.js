@@ -25,7 +25,8 @@ const getMyChats=async(req,res,next)=>{
     
     const transformedChats=chats.map(({_id,name,members,groupChat})=>{
         const otherMember=getOtherMember(members,req.user)
-        const whoseAvatar=groupChat? members.slice(0,3).map(({avatar})=>avatar.url):[otherMember.avatar.url]
+        // console.log("otherMember ",otherMember)
+        const whoseAvatar=groupChat? members.slice(0,3).map(({avatar})=>avatar.url):[otherMember?.avatar?.url]
         // could be done using filter than map
         const memberId=members.reduce((prev,cur)=>{
             if(cur._id.toString()!==req.user.toString()){
@@ -35,7 +36,7 @@ const getMyChats=async(req,res,next)=>{
         },[])
         return {
             _id,
-            name:groupChat?name:otherMember.name,
+            name:groupChat?name:otherMember?.name,
             members:memberId,
             // lastMessage:lastMessage,
             groupChat:groupChat,
@@ -264,9 +265,6 @@ const deleteChat = async function(req,res,next){
             chat.deleteOne(),
             Message.deleteMany({chat:chatId})
         ])
-        // console.log("members ",members)
-        const chat2=await Chat.findById(chatId)
-        
         emitEvent(req,REFETCH_CHATS,members)
         return res.status(201).json({
             sucess:true,

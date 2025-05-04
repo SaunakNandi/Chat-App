@@ -17,8 +17,8 @@ import cors from 'cors'
 import {v2 as cloudinary} from 'cloudinary'
 import { corsOptions } from './constants/config.js'
 import { socketAuthenticator } from './middlewares/auth.js'
-// import { createSingleChat,createGroupChat, createMessages, createMessagesInAChat } from './seeders/chat.js'
-// import { createUser } from './seeders/user.js'
+import { createSingleChat,createGroupChat, createMessagesInAChat } from './seeders/chat.js'
+import { createUser } from './seeders/user.js'
 
 dotenv.config({
     path:'./.env'
@@ -31,7 +31,7 @@ cloudinary.config({
     api_key:process.env.CLOUDINARY_API_KEY,
     api_secret:process.env.CLOUDINARY_API_SECRET
 })
-// createUser(10)
+// createUser(20)
 // createSingleChat(10)
 // createGroupChat(10)
 // createMessagesInAChat('67961e683b1bab4d77ac2dc3',50) // rerum argulo
@@ -66,7 +66,7 @@ io.use((socket,next)=>{
 // waiting for the event to get fired from socket.jsx in client side
 io.on('connection',(socket)=>{
     const user=socket.user
-    console.log('User connected ',user._id,user.name)
+    // console.log('User connected ',user._id,user.name)
     onlineUsers.add(user._id.toString())
     userSocketIDs.set(user._id.toString(),socket.id)  // keeping track of the user._id connected to the socket.id
     // console.log("userSocketIDs ",userSocketIDs)
@@ -89,7 +89,7 @@ io.on('connection',(socket)=>{
         }
         // members contains array of user ids
         const membersSocket=getSockets(members)  // contain socket id's of each member
-        console.log("Emitting ",messageForRealTime)  
+        // console.log("Emitting ",messageForRealTime)  
         // console.log("Members: ",members)
 
         // io.to() This tells Socket.IO to send a message only to the specified socket IDs.
@@ -122,12 +122,12 @@ io.on('connection',(socket)=>{
     socket.on(CHAT_JOINED,({userId,members,chatId})=>{
         if(members)
         {
-            console.log("members ",members,chatId)
+            // console.log("members ",members,chatId)
             otherMemberJoined=members.find((x)=> x.toString()!==userId.toString())
-            console.log("other member joined ",otherMemberJoined)
+            // console.log("other member joined ",otherMemberJoined)
             if(onlineUsers.has(otherMemberJoined.toString()))
                 chatBuddy.set(chatId.toString(),[otherMemberJoined.toString(),userId.toString()])
-            console.log("chat buddy ",chatBuddy)
+            // console.log("chat buddy ",chatBuddy)
         }
         else 
             chatBuddy.set(chatId.toString(),userId.toString())
@@ -135,7 +135,7 @@ io.on('connection',(socket)=>{
         io.to(membersSocket).emit(ONLINE_USERS,Array.from(chatBuddy))
     })
     socket.on(CHAT_LEAVED,({userId,members,chatId})=>{
-        console.log("chatId ",chatId)
+        // console.log("chatId ",chatId)
         if(otherMemberJoined && chatBuddy.has(chatId.toString()))
         {
             chatBuddy.delete(chatId.toString())
@@ -143,12 +143,12 @@ io.on('connection',(socket)=>{
         }
         else if(chatBuddy.has(chatId.toString()))
             chatBuddy.delete(userId.toString())
-        console.log("After Deletion ",chatBuddy)
+        // console.log("After Deletion ",chatBuddy)
         const membersSocket=getSockets(members)
         io.to(membersSocket).emit(ONLINE_USERS,Array.from(chatBuddy))
     })
     socket.on('disconnect',()=>{
-        console.log('User disconnected ',user.name)
+        // console.log('User disconnected ',user.name)
         if(otherMemberJoined)
         {
             chatBuddy.delete(otherMemberJoined.toString())

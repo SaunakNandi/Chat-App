@@ -89,7 +89,7 @@ const createMessagesInAChat=async(chatId,numMessages)=>{
             )
         }
         await Promise.all(messagesPromise)
-        console.log("Messages created in chat",chatId)
+        // console.log("Messages created in chat",chatId)
         process.exit()
     } catch (error) {
         console.log("Create Message Error",error)

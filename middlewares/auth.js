@@ -1,4 +1,3 @@
-import { chat_token } from "../constants/config.js"
 import { User } from "../models/user.models.js"
 import { ErrorHandler } from "../utils/utility.js"
 import jwt from 'jsonwebtoken'
