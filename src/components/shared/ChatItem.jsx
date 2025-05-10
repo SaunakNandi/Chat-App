@@ -4,8 +4,8 @@ import { Box, Stack, Typography } from '@mui/material'
 import AvatarCard from './AvatarCard'
 import {motion} from 'framer-motion'
 
-const ChatItem = ({avatar=[],name,_id,groupChat=false,lastMsg,
-    sameSender,isOnline,newMessageAlert,index=0.01,handleDeleteChat}) => {
+const ChatItem = ({avatar=[],name,_id,groupChat=false,
+    sameSender,isOnline,newMessageAlert,handleDeleteChat}) => {
         // console.log(newMessageAlert)
   return (
     <Link to={`/chat/${_id}`} onContextMenu={(e)=>handleDeleteChat(e,_id,groupChat)}

@@ -7,7 +7,7 @@ import ChatList from '../specific/ChatList'
 import { useNavigate, useParams } from 'react-router-dom'
 import Profile from '../specific/Profile'
 import { useMyChatsQuery, useChatDetailsQuery } from '../../redux/api/api'
-import { Drawer, Skeleton } from '@mui/material'
+import { Drawer, Skeleton, Stack } from '@mui/material'
 import { useDispatch, useSelector } from 'react-redux'
 import { setIsDeletemenu, setIsMobile, setSelectedDeleteChat } from '../../redux/reducers/misc'
 import { useErrors } from '../../hooks/hook'
@@ -17,7 +17,7 @@ import { incrementNotifications, setNewMessagesAlert } from '../../redux/reducer
 import { useSocketEvents } from '../../hooks/hook'
 import { getOrSaveFromStorage } from '../lib/Feature.js'
 import DeleteChatMenu from '../DeleteChatMenu.jsx'
-
+import chatapp_img_no_friends from '../../assets/chatapp_img_no_friends.png';
 // HOC
 // AppLayout is an arrow function that returns another function (WrappedComponent) => {}.
 
@@ -36,12 +36,12 @@ const AppLayout = () =>(WrappedComponent)=> {
     let chatDetails
     if(chatId)
         chatDetails=useChatDetailsQuery({chatId,skip:!chatId})  // only call when chatId is there
-    console.log("chatDetails,chatId",chatDetails,chatId)
+    
     const members=chatDetails?.data?.chat?.members
     const friendsID=members && members.filter((x)=>x!=user._id)
     console.log("friendsID",friendsID && friendsID[0])
     const {isLoading,data,isError,error,refetch}=useMyChatsQuery("")
-    console.log(data)
+    
     const deleteMenuAnchor=useRef(null)
     useEffect(()=>{
         // when we loads the page, in the newMessagesAlert get reset =>{chatId: "", count: 0} and new message is not visible
@@ -75,14 +75,15 @@ const AppLayout = () =>(WrappedComponent)=> {
         console.log("Refetching")
         console.log(data)
         refetch()
-        if(user._id.toString()==data.userId.toString()) navigate('/')
+        if(data?.userId && user._id.toString()==data?.userId.toString()) navigate('/')
     },[refetch,navigate])
 
-    const onlineUsersListener =useCallback((data)=>{
+    const onlineUsersListener=useCallback((data)=>{
         console.log("onlineUsersListener ",data)
         setOnlineUsers(data)
     },[dispatch])
     const UsersListener =(data)=>{
+        console.log("UsersListener",data)
         if(chatId && user._id && data)
         {
                 // console.log("UsersListener ",data,user._id.toString())
@@ -100,11 +101,14 @@ const AppLayout = () =>(WrappedComponent)=> {
         [NEW_MESSAGE_ALERT]:newMessageAlertHandler,
         [NEW_REQUEST]:newRequestListener, 
         [REFETCH_CHATS]:refetchListener,
-        // [ONLINE_USERS]:onlineUsersListener
+        [ONLINE_USERS]:onlineUsersListener
     }   
-      
+    
+    console.log("onlineUsers ",onlineUsers)
     useSocketEvents(socket,eventHandlers)
     useErrors([{error,isError}])
+    console.log("chatDetails,chatId",chatDetails,chatId)    
+    console.log("Data fetched",data)
     return(
         <>
             <Title/>
@@ -131,17 +135,30 @@ const AppLayout = () =>(WrappedComponent)=> {
                         display: { xs: "none", sm: "block" },
                     }}>
                     {
-                        isLoading? (<Skeleton/>):
-                        (<ChatList chats={data?.chats} chatId={chatId} handleDeleteChat={handleDeleteChat}
-                            newMessagesAlert={newMessagesAlert} onlineUsers={onlineUsers}/>)
+                        isLoading ? (
+                            <Skeleton />
+                        ) : (
+                            data.chats.length === 0 || (chatId && typeof chatDetails=='undefined')? (
+                            <div style={{ display: 'flex',alignItems: 'center',justifyContent: 'center', height:'100%' }}>
+                                <img style={{objectFit:'contain', width:'24vw'}} 
+                                src={chatapp_img_no_friends} alt="No chats found" />
+                            </div>
+                            ) : (
+                            <ChatList
+                                chats={data?.chats}
+                                chatId={chatId}
+                                handleDeleteChat={handleDeleteChat}
+                                newMessagesAlert={newMessagesAlert}
+                                onlineUsers={onlineUsers}
+                            />
+                            )
+                        )
                     }
                 </Grid>
 
                 <Grid item size={{ xs: 12, sm:8 ,md: 5, lg:6  }} sx={{
                         height: "100%",
-                        bgcolor: "aliceblue",
-                    }}
-                >
+                        bgcolor: "aliceblue",}}>
                     {/* Chat component can be accessed from this WrappedComponent */}
                     {
                         chatDetails &&  

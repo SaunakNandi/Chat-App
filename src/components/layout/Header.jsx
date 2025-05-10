@@ -9,10 +9,9 @@ import axios from 'axios'
 import { useDispatch,useSelector } from 'react-redux'
 import { userNotExists } from '../../redux/reducers/auth'
 import toast from 'react-hot-toast'
-import { setIsMobile, setIsNewGroup, setIsNotification, setIsSearch, setIsUpdateOptionOpen } from '../../redux/reducers/misc'
+import { setIsMobile, setIsNewGroup, setIsNotification, setIsSearch } from '../../redux/reducers/misc'
 import { resetNotifications } from '../../redux/reducers/chat'
 import { getSocket } from '../../socket'
-import UpdateProfile from '../../pages/UpdateProfile'
 
 const SearchBox=lazy(()=> import('../specific/SearchBox'))
 const NotificationBell=lazy(()=> import('../specific/NotificationsBell'))
@@ -126,13 +125,6 @@ const Header = () => {
             )
         }
         
-        {/* {
-            isUpdateBoxOpen && (
-                <Suspense fallback={<Backdrop open/>}>
-                    <UpdateProfile />
-                </Suspense>
-            )
-        } */}
     </>
   )
 }

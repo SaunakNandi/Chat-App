@@ -12,7 +12,7 @@ import {server} from '../constants/config'
 
 const usernameRegex = /^[a-zA-Z0-9_]{4,16}$/; // Example: 4-16 chars, letters/numbers/underscore
 const passwordRegex = /^(?=.*[A-Z])(?=.*\d)[A-Za-z\d@$!%*?&]{6,}$/; // Example: 6+ chars, 1 upper, 1 number
-const nameRegex = /^[A-Za-z\\s]+$/;
+const nameRegex = /^[A-Za-z ]{2,50}$/;
 const Login = () => {
   const [isLogin, setIsLogin] = useState(true)
   const [isLoading, setIsLoading] = useState(false);
