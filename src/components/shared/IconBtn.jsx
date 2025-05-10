@@ -1,8 +1,9 @@
 import { Tooltip,IconButton, Badge } from "@mui/material"
-export const IconBtn=({title,icon,func,value})=>{
+import { forwardRef } from "react"
+export const IconBtn=forwardRef(({title,icon,func,value},ref)=>{
     return (
         <Tooltip title={title}>
-            <IconButton color='inherit' size='large' onClick={func}>
+            <IconButton color='inherit' size='large' onClick={func} ref={ref}>
                 {
                     value? <Badge badgeContent={value} color="error">{icon}</Badge>:icon
                 }
@@ -10,4 +11,4 @@ export const IconBtn=({title,icon,func,value})=>{
             </IconButton>
         </Tooltip>
     )
-}
+})

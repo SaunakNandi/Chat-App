@@ -1,28 +1,32 @@
-import { AppBar, Backdrop, Box, IconButton, Toolbar, Typography } from '@mui/material'
-import React, { lazy, Suspense } from 'react'
+import { AppBar, Backdrop, Box, ClickAwayListener, IconButton, Paper, Popper, Stack, Toolbar, Typography } from '@mui/material'
+import React, { lazy, Suspense, useRef, useState } from 'react'
 import { orange } from '../../constants/Color'
 import { Add as AddIcon, Group as GroupIcon, Menu as MenuIcon, Search as SearchIcon, Logout as LogoutIcon, 
-    Notifications as NotificationsIcon } from '@mui/icons-material'
-import { useNavigate } from 'react-router-dom'
+    Notifications as NotificationsIcon, MoreVert as MoreVertIcon } from '@mui/icons-material'
+import { Link, useNavigate } from 'react-router-dom'
 import { IconBtn } from '../shared/IconBtn'
 import axios from 'axios'
 import { useDispatch,useSelector } from 'react-redux'
 import { userNotExists } from '../../redux/reducers/auth'
 import toast from 'react-hot-toast'
-import { setIsMobile, setIsNewGroup, setIsNotification, setIsSearch } from '../../redux/reducers/misc'
+import { setIsMobile, setIsNewGroup, setIsNotification, setIsSearch, setIsUpdateOptionOpen } from '../../redux/reducers/misc'
 import { resetNotifications } from '../../redux/reducers/chat'
+import { getSocket } from '../../socket'
+import UpdateProfile from '../../pages/UpdateProfile'
 
 const SearchBox=lazy(()=> import('../specific/SearchBox'))
 const NotificationBell=lazy(()=> import('../specific/NotificationsBell'))
 const NewGroups=lazy(()=> import('../specific/NewGroups'))
 
 const Header = () => {
-  const server=import.meta.env.VITE_SERVER
+    const [isUpdateOptionOpen,setIsUpdateOptionOpen]=useState(false)
+    const socket=getSocket()
+    const server=import.meta.env.VITE_SERVER
     const navigate=useNavigate()
     const dispatch=useDispatch()
+    const anchorRef=useRef(null)
     const {isSearch,isNotification,isNewGroup}=useSelector(state=>state.misc)
     const {notificationCount}=useSelector(state=>state.chat)
-
     const handleMobile=()=>{
         dispatch(setIsMobile(true))
     }
@@ -41,7 +45,9 @@ const Header = () => {
     }
     const logoutHandler=async()=>{
         // Logout logic here
-
+        if (socket) {
+            socket.disconnect();
+        }
 //       withCredentials- ✅ Allows sending & receiving cookies (useful for authentication).
 // ✅ Needed for sessions & JWT tokens when working with CORS requests.
         try {
@@ -59,7 +65,7 @@ const Header = () => {
   return (
     <>
         <Box sx={{flexGrow:1}} height={"4 rem"}>
-            <AppBar  sx={{
+            <AppBar sx={{
                 bgcolor:orange,
                 position:"static",
             }}>
@@ -78,6 +84,22 @@ const Header = () => {
                         <IconBtn title={"Manage Groups"} icon={<GroupIcon/>} func={navigateGroup}></IconBtn>
                         <IconBtn title={"Notifications"} icon={<NotificationsIcon/>} func={openNotification} value={notificationCount}/>
                         <IconBtn title={"Logout"} icon={<LogoutIcon/>} func={logoutHandler}></IconBtn>
+                        <IconBtn icon={<MoreVertIcon/>} func={()=>setIsUpdateOptionOpen(true)} ref={anchorRef}/>
+                        {
+                            isUpdateOptionOpen && (
+                            <Popper open={isUpdateOptionOpen} anchorEl={anchorRef.current} placement="bottom-start" style={{ zIndex: 1300}}>
+                                <ClickAwayListener onClickAway={()=>setIsUpdateOptionOpen(false)}>
+                                    <div>
+                                        <Suspense fallback={<Backdrop open />}>
+                                            <Paper sx={{ p: 2, mt: 1 }}>
+                                                <Link to={'/update'} style={{textDecoration:'none',color:'black'}}>Update My Profile</Link>
+                                            </Paper>
+                                        </Suspense>
+                                    </div>
+                                </ClickAwayListener>
+                            </Popper>
+                            )
+                        }
                     </Box>
                 </Toolbar>
             </AppBar>
@@ -103,6 +125,14 @@ const Header = () => {
                 </Suspense>
             )
         }
+        
+        {/* {
+            isUpdateBoxOpen && (
+                <Suspense fallback={<Backdrop open/>}>
+                    <UpdateProfile />
+                </Suspense>
+            )
+        } */}
     </>
   )
 }

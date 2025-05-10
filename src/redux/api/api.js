@@ -36,6 +36,17 @@ const api=createApi({
             providesTags:["User"]
         }),
 
+        updateMyProfile:builder.mutation({
+            query:(formData)=>{
+                return ({
+                    url:'user/update-profile',
+                    method:'PATCH',
+                    credentials:'include',
+                    body:formData,
+                })
+            }
+        }),
+
         friendsDetails:builder.query({
             query:(id)=>({
                 url:`user/getDetails?id=${id}`,

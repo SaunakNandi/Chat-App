@@ -7,6 +7,7 @@ import { userNotExists,userExists } from './redux/reducers/auth'
 import axios from 'axios'
 import {Toaster} from 'react-hot-toast'
 import { SocketProvider } from './socket'
+import UpdateProfile from './pages/UpdateProfile'
 const Home = lazy(() => import('./pages/Home'))
 const Login = lazy(() => import('./pages/Login'))
 const Chat = lazy(() => import('./pages/Chat'))
@@ -47,6 +48,7 @@ function App() {
           }>
             {/* Now sockets can be accessed by this route */}
             <Route path='/' element={<Home />} />
+            <Route path='/update' element={<UpdateProfile/>}/>
             <Route path='/chat/:chatId' element={<Chat />} />
             <Route path='/groups' element={<Groups />} />
           </Route>
