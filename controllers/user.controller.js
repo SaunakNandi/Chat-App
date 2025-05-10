@@ -2,7 +2,7 @@ import { compare } from 'bcrypt'
 import {User} from '../models/user.models.js'
 import {Chat} from '../models/chat.models.js'
 import {Request} from '../models/request.models.js'
-import { emitEvent, sendToken, uploadFilesToCloudinary } from '../utils/features.js'
+import { deleteFilesFromCloudinary, emitEvent, sendToken, uploadFilesToCloudinary } from '../utils/features.js'
 import { ErrorHandler } from '../utils/utility.js'
 import { NEW_REQUEST, REFETCH_CHATS } from '../constants/events.js'
 import { getOtherMember } from '../lib/helper.lib.js'
@@ -15,10 +15,8 @@ const login=async(req,res,next)=>{
         // console.log(username,password)
         const user=await User.findOne({username}).select('+password')
         if(!user) return next(new ErrorHandler('Invalid user',404)) // this next will go to the errorMiddleware
-           // return res.status(400).json({success:false,message:'Invalid Credentials'})
         const isMatch=await compare(password,user.password)
         if(!isMatch) return next(new ErrorHandler('Invalid credentials',404)) // this next will go to the errorMiddleware
-            // return res.status(400).json({success:false,message:'Invalid Credentials'})
         sendToken(res,user,200,'User Logged In Successfully')
     } catch (error) {
         next(error)
@@ -191,6 +189,35 @@ const getUserDetails=async(req,res)=>{
         console.log("Error at getUserDetails ",error)
         // return res.status(500).jons({message:"Not able to get user data"})
     }
-    
 }
-export {login,newUser,getMyProfile,logout,searchUser,sendFrndReq,acceptFrndReq,getMyNotifications,getMyFriends,getUserDetails}
+
+const updateMyProfile=async(req,res)=>{
+    try {
+        const {name,bio}=req.body
+        const imgFile=req.file
+        const user=await User.findById(req.user)
+        console.log("user found ",user)
+        if(!user) return next(new ErrorHandler("User not found",404))
+
+        if (!name && !bio && !imgFile) return res.status(200).json({ user });
+        const public_id=user.avatar?.public_id
+        let avatar=null
+        if(imgFile)
+        {
+            await deleteFilesFromCloudinary(public_id)
+            let result=await uploadFilesToCloudinary([imgFile])
+            console.log(result)
+            avatar={public_id:result.public_id,url:result.url}
+        }
+        if(avatar)
+            user.avatar=avatar
+        user.bio=bio || user.bio
+        user.name=name || user.name
+        console.log("updated user",user)
+        await user.save()
+        return res.status(200).json({success:true,message:'User is updated',user})
+    } catch (error) {
+        console.log("Error at update my profile ",error)
+    }
+}
+export {login,newUser,getMyProfile,logout,searchUser,sendFrndReq,acceptFrndReq,getMyNotifications,getMyFriends,getUserDetails,updateMyProfile}
