@@ -33,7 +33,7 @@ export const FileMenu = ({anchorEl,chatId}) => {
       files.forEach((file)=>myForm.append("files",file))
 
       const response=await sendAttachments(myForm)
-      console.log(response)
+      console.log("fileChangeHandler",response)
       if(response.data)
       {
         toast.success(`${key} send successfully`,{id:toastId})

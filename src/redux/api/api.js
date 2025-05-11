@@ -47,6 +47,18 @@ const api=createApi({
             }
         }),
 
+        forgotPassword:builder.mutation({
+            query:(formData)=>{
+                console.log(formData)
+                return({
+                    url:'user/forgot-password',
+                    method:'PATCH',
+                    credentials:'include',
+                    body:formData
+                })
+            }
+        }),
+
         friendsDetails:builder.query({
             query:(id)=>({
                 url:`user/getDetails?id=${id}`,
@@ -190,9 +202,9 @@ const api=createApi({
     })
 })
 
-console.log(api.endpoints?.acceptFriendRequest) // to about the hooks created for the corresponding endpoints
+// console.log(api.endpoints?.acceptFriendRequest) // to about the hooks created for the corresponding endpoints
     
 
 export default api
 export const {useMyChatsQuery,useLazySearchUserQuery,useSendFriendRequestMutation,useGetNotificationsQuery,
-    useAcceptFriendRequestMutation,useChatDetailsQuery,useGetMessagesQuery, useSendAttachmentsMutation, useMyGroupsQuery,useAvailableFriendsQuery,useNewGroupMutation,useRenameGroupMutation,useRemoveGroupMemberMutation,useAddGroupMemberMutation,useFriendsDetailsQuery,useDeleteChatMutation,useLeaveGroupMutation}=api
+    useAcceptFriendRequestMutation,useChatDetailsQuery,useGetMessagesQuery, useSendAttachmentsMutation, useMyGroupsQuery,useAvailableFriendsQuery,useNewGroupMutation,useRenameGroupMutation,useRemoveGroupMemberMutation,useAddGroupMemberMutation,useFriendsDetailsQuery,useDeleteChatMutation,useLeaveGroupMutation,useForgotPasswordMutation}=api

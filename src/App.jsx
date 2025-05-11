@@ -8,6 +8,7 @@ import axios from 'axios'
 import {Toaster} from 'react-hot-toast'
 import { SocketProvider } from './socket'
 import UpdateProfile from './pages/UpdateProfile'
+import ForgotPassword from './pages/ForgotPassword'
 const Home = lazy(() => import('./pages/Home'))
 const Login = lazy(() => import('./pages/Login'))
 const Chat = lazy(() => import('./pages/Chat'))
@@ -40,6 +41,7 @@ function App() {
     <>
       <Suspense fallback={<Loader />}>
         <Routes>
+          <Route path='/forgotpassword' element={<ForgotPassword/>}/>
           {/* These will be under outlet */}
           <Route element={
             <SocketProvider>
@@ -57,6 +59,7 @@ function App() {
               <Login />
             </ProtectRoute>
           } />
+          
           <Route path="*" element={<NotFound/>}/>
         </Routes>
       </Suspense>

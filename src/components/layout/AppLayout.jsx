@@ -83,7 +83,6 @@ const AppLayout = () =>(WrappedComponent)=> {
         setOnlineUsers(data)
     },[dispatch])
     const UsersListener =(data)=>{
-        console.log("UsersListener",data)
         if(chatId && user._id && data)
         {
                 // console.log("UsersListener ",data,user._id.toString())

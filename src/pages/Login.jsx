@@ -9,6 +9,7 @@ import { useDispatch } from 'react-redux'
 import { userExists } from '../redux/reducers/auth'
 import toast from 'react-hot-toast'
 import {server} from '../constants/config'
+import { Link } from 'react-router-dom'
 
 const usernameRegex = /^[a-zA-Z0-9_]{4,16}$/; // Example: 4-16 chars, letters/numbers/underscore
 const passwordRegex = /^(?=.*[A-Z])(?=.*\d)[A-Za-z\d@$!%*?&]{6,}$/; // Example: 6+ chars, 1 upper, 1 number
@@ -127,7 +128,8 @@ const Login = () => {
                 value={password.value} onChange={password.changeHandler}/>
                 <Button sx={{marginTop:'1rem'}} variant="contained" color="primary" type="submit" fullWidth
                 disabled={isLoading}>Login</Button>
-                <Typography textAlign={"center"} m={"1rem"}>or</Typography>
+                <Link to={'/forgotpassword'} style={{textAlign:'center'}}>Forgot Password</Link>
+                <Typography textAlign={"center"} margin={"1rem"}>or</Typography>
                 <Button variant="text" fullWidth onClick={()=>setIsLogin(false)} disabled={isLoading}>Signup instead</Button>
               </form>
                 </>
