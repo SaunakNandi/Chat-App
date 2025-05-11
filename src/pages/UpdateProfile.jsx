@@ -24,10 +24,10 @@ const UpdateProfile = () => {
     {
         e.preventDefault()
         console.log(avatarRef.current.files[0])
-        // setLoading(true)
+        setLoading(true)
         try {
             const newError={}
-            console.log(nameRef.current.value,bioRef.current.value)
+            // console.log(nameRef.current.value,bioRef.current.value)
             const name=nameRef.current.value.trim()
             const bio=bioRef.current.value.trim()
             const avatar=avatarRef.current.files[0]
@@ -38,6 +38,7 @@ const UpdateProfile = () => {
             formData.append("name",name)
             formData.append("bio",bio)
             formData.append("avatar",avatar)
+            console.log(formData)
             const {data}=await axios.patch(`${server}/api/v1/user/update-profile`,
                 formData,
                 {
@@ -70,6 +71,7 @@ const UpdateProfile = () => {
                             <VisuallyHiddenInput type='file' ref={avatarRef} accept="image/*"/>
                         </IconButton>
                     </Stack>
+                    {/* inputRef for <TextField/> */}
                     <TextField defaultValue={user.name} inputRef={nameRef} margin="normal" variant="outlined" fullWidth/>
                     {
                         errors.name && <Typography color="error" variant='caption'>{errors.name}</Typography>

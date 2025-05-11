@@ -1,6 +1,5 @@
 import { Avatar, Stack, Typography } from '@mui/material'
-import React from 'react'
-import { Face as FaceIcon, AlternateEmail as UsernameIcon, CalendarMonth as CalendarIcon } from '@mui/icons-material'
+import { Face as FaceIcon, CalendarMonth as CalendarIcon } from '@mui/icons-material'
 import moment from 'moment'
 import { transformImage } from '../lib/Feature'
 import { useFriendsDetailsQuery } from '../../redux/api/api'
@@ -18,7 +17,6 @@ const Profile = ({friendsID}) => {
       }}
       src={transformImage(friendsDetails.data?.friendsData?.avatar?.url)}/>
       <ProfileCard heading={'Bio'} text={friendsDetails.data.friendsData?.bio}/>
-      <ProfileCard heading={'Username'} text={friendsDetails.data.friendsData?.username} Icon={<UsernameIcon/>}/>
       <ProfileCard heading={'Joined'} text={moment(friendsDetails.data.friendsData?.createdAt).fromNow()} Icon={<CalendarIcon/>}/>
       <ProfileCard heading={'Name'} text={friendsDetails.data.friendsData?.name} Icon={<FaceIcon/>}/>
     </Stack>

@@ -38,11 +38,14 @@ const MessageComponent = ({message,user}) => {
             const file=fileFormat(url)
             return (
               <Box key={index}>
-                <a href={url} target='_blank' download 
-                style={{
-                  color:'black',
-                }}>
-                  {RenderAttachments(file,url)}
+                <a
+                  href={url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  {...(file === 'pdf' ? {} : { download: true })}
+                  style={{ color: 'black' }}
+                >
+                  {RenderAttachments(file, url)}
                 </a>
               </Box>
             )
