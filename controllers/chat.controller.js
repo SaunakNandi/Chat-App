@@ -184,6 +184,7 @@ const sendAttachment = async function(req,res,next){
 
 const getChatDetails = async function(req,res,next){
     try {
+        // for group chat 
         if(req.query.populate==="true")
         {
             const chat=await Chat.findById(req.params.id).populate('members','name avatar').lean()
@@ -201,7 +202,7 @@ const getChatDetails = async function(req,res,next){
                 chat
             })
         }
-        else{
+        else{  // for 1 - 1 chat
             const chat=await Chat.findById(req.params.id)
             if(!chat) return next(new ErrorHandler('Chat not found',404))
             return res.status(201).json({

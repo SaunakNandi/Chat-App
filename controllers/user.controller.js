@@ -51,9 +51,31 @@ const newUser=async(req,res)=>{
     }
 }
 
+const forgotPassword=async(req,res,next)=>{
+    try {
+        const {username,password}=req.body
+        console.log(req.body)
+        console.log("username password",username,password)
+        if (!password) {
+            return next(new ErrorHandler("New password is required", 400));
+        }
+
+        const user=await User.findOne({username}).select('+password')
+        console.log("user is ",user)
+
+        if(!user) return next(new ErrorHandler('User Not found',404))
+        user.password=password
+        await user.save()
+        return res.status(200).json({success:true})
+        // sendToken(res,user,200,'User logged in successfully')
+    } catch (error) {
+        console.log("forgotPassword error ",error)
+    }
+}
+
 const getMyProfile=async(req,res,next)=>{
     const user=await User.findById(req.user)
-    // console.log(req.user)
+    console.log(req.user)
     if(!user) return next(new ErrorHandler("User not found",404))
     return res.status(200).json({success:true,user})
 }
@@ -191,7 +213,7 @@ const getUserDetails=async(req,res)=>{
     }
 }
 
-const updateMyProfile=async(req,res)=>{
+const updateMyProfile=async(req,res,next)=>{
     try {
         const {name,bio}=req.body
         const imgFile=req.file
@@ -220,4 +242,4 @@ const updateMyProfile=async(req,res)=>{
         console.log("Error at update my profile ",error)
     }
 }
-export {login,newUser,getMyProfile,logout,searchUser,sendFrndReq,acceptFrndReq,getMyNotifications,getMyFriends,getUserDetails,updateMyProfile}
+export {login,newUser,getMyProfile,logout,searchUser,sendFrndReq,acceptFrndReq,getMyNotifications,getMyFriends,getUserDetails,updateMyProfile,forgotPassword}

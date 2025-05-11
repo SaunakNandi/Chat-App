@@ -1,3 +1,0 @@
-we read upto socket creation. 
-chat.controller & chat.routes part is left
-ErrorHandling is not analyzed
