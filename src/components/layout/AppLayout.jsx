@@ -39,7 +39,7 @@ const AppLayout = () =>(WrappedComponent)=> {
     
     const members=chatDetails?.data?.chat?.members
     const friendsID=members && members.filter((x)=>x!=user._id)
-    console.log("friendsID",friendsID && friendsID[0])
+    // console.log("friendsID",friendsID && friendsID[0])
     const {isLoading,data,isError,error,refetch}=useMyChatsQuery("")
     
     const deleteMenuAnchor=useRef(null)
@@ -103,11 +103,11 @@ const AppLayout = () =>(WrappedComponent)=> {
         [ONLINE_USERS]:onlineUsersListener
     }   
     
-    console.log("onlineUsers ",onlineUsers)
+    // console.log("onlineUsers ",onlineUsers)
     useSocketEvents(socket,eventHandlers)
     useErrors([{error,isError}])
-    console.log("chatDetails,chatId",chatDetails,chatId)    
-    console.log("Data fetched",data)
+    // console.log("chatDetails,chatId",chatDetails,chatId)    
+    // console.log("Data fetched",data)
     return(
         <>
             <Title/>

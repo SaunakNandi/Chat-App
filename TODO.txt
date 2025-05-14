@@ -1,1 +1,0 @@
-// While uploading the file it get send automatically. We need to fix this by creating a preview like WhatsApp and we put a button there. So when we click the button only then it will get submitted

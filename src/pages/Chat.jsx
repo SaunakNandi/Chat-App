@@ -27,6 +27,8 @@ const Chat = ({chatId,user,chatDetails}) => {
   const [page,setPage]=useState(1)
   const [IamTyping,setIamTyping]=useState(false)
   const [userTyping,setUserTyping]=useState(false)
+  const [isPopupModel,setIsPopupModel]=useState(false)
+  
   const typingTimeOut=useRef(null)
   const navigate=useNavigate()
   const oldMessagesChunk=useGetMessagesQuery({chatId,page})
@@ -35,6 +37,7 @@ const Chat = ({chatId,user,chatDetails}) => {
   const bottomRef=useRef(null)
   
   const handleFileOpen=(e)=>{
+    setIsPopupModel(true)
     dispatch(setIsFileMenu(true))
     setFileMenuAnchor(e.currentTarget)
   }
@@ -161,9 +164,13 @@ const Chat = ({chatId,user,chatDetails}) => {
       }}>
         {/* Messages */}
         {
-          allMessages.map((msg)=>(
-            <MessageComponent message={msg} user={user} key={msg._id}/>
-          ))
+          allMessages.map((msg)=>{
+            // console.log("msg.id ",typeof msg._id)
+            const id=typeof msg=='undefined'? Math.floor(Math.random()*99999):msg._id+Math.floor(Math.random()*99999)
+            return(
+            <MessageComponent message={msg} user={user} 
+            key={id}/>
+          )})
         }
         {userTyping && <TypingLoader ref={bottomRef}/>}
 
@@ -195,7 +202,7 @@ const Chat = ({chatId,user,chatDetails}) => {
           </IconButton>
         </Stack>
       </form>
-      <FileMenu anchorEl={fileMenuAnchor} chatId={chatId}/>
+      <FileMenu anchorEl={fileMenuAnchor} isPopupModel={isPopupModel} setIsPopupModel={setIsPopupModel}/>
     </>
   )
 }
