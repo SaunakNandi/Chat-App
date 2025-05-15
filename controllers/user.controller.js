@@ -93,7 +93,7 @@ const logout=async(req,res)=>{
 const searchUser=async(req,res)=>{
     //same as req.query.name
     const {name="",id=""}=req.query  //If name is not present in req.query, it defaults to an empty string ("").
-    console.log("my id ",typeof id)
+    
     // finding all my connections
     const myChats=await Chat.find({groupChat:false,members:req.user})  // getting req.user from isAuthenticated
     const allUsersFromMyChats=myChats.flatMap((chat)=>chat.members)  // chat.members is an array itself
@@ -101,13 +101,17 @@ const searchUser=async(req,res)=>{
     // console.log("allUsersFromMyChats",allUsersFromMyChats)
     const currentUserObjectId = new mongoose.Types.ObjectId(String(id));  // converting to string for VScode warning
     const nottoConsiderThoseids=allUsersFromMyChats.length?[...allUsersFromMyChats,currentUserObjectId]:[currentUserObjectId]
+    
+    // find all users excluding those whom I have sent request
+    const requests=await Request.find({sender:req.user})//.populate('receiver','_id')
+    const receiverIds=requests.map(item=>item.receiver.toString())
+    const excludeIds=[...nottoConsiderThoseids,...receiverIds]
     const allUsersExceptMeandFriends=await User.find({
-        _id:{$nin:nottoConsiderThoseids},
+        _id:{$nin:excludeIds},
         name:{$regex:name,$options:"i"}  
     })
 
     // console.log("allUsersExceptMeandFriends ",allUsersExceptMeandFriends)
-    // avatar.url can be done from frontend also but we did it from here
     //modifying the response 
     const users=allUsersExceptMeandFriends.map(({_id,name,avatar})=>({_id,name,avatar:avatar.url}))
     return res.status(200).json({success:true,users})
