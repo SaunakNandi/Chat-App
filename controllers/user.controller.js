@@ -125,7 +125,7 @@ const sendFrndReq=async(req,res,next)=>{
             {sender:userId,receiver:req.user}
         ]
     })
-    if(request) return next(new ErrorHandler('Friend Request already sent'))
+    // if(request) return next(new ErrorHandler('Friend Request already sent'))
     await Request.create({
         sender:req.user,
         receiver:userId
@@ -135,6 +135,14 @@ const sendFrndReq=async(req,res,next)=>{
     return res.status(200).json({success:true,message:'Friend Request Sent'})
 }
 
+const cancelFrndReq=async(req,res,next)=>{
+    const {userId}=req.query
+    console.log("requested userID is ",userId)
+    const request=await Request.deleteOne({sender:req.user,receiver:userId})
+    console.log("Requests ",request)
+    if(request.deletedCount==0) return next(new ErrorHandler('Request not found or already deleted')) 
+    return res.status(200).json({success:true,message:'Friend request cancelled'})
+}
 // req.user comming from isAuthenticated
 const acceptFrndReq=async(req,res,next)=>{
     const {requestId,accept}=req.body
@@ -246,4 +254,4 @@ const updateMyProfile=async(req,res,next)=>{
         console.log("Error at update my profile ",error)
     }
 }
-export {login,newUser,getMyProfile,logout,searchUser,sendFrndReq,acceptFrndReq,getMyNotifications,getMyFriends,getUserDetails,updateMyProfile,forgotPassword}
+export {login,newUser,getMyProfile,logout,searchUser,sendFrndReq,acceptFrndReq,getMyNotifications,getMyFriends,getUserDetails,updateMyProfile,forgotPassword,cancelFrndReq}
