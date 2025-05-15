@@ -79,6 +79,15 @@ const api=createApi({
             // In RTK Query, stale data means cached data that is no longer considered up-to-date and needs to be refetched from the server.
         }),
 
+        cancelRequest:builder.mutation({
+            query:({userId})=>{
+                console.log("cancel-req ",userId)
+                    return ({url:`user/cancel-req?userId=${userId}`,
+                    method:'DELETE',
+                    credentials:'include'})
+                },
+            invalidatesTags:["User"]
+        }),
         acceptFriendRequest:builder.mutation({
             query:(data)=>({
                 url:"user/accept-req",
@@ -206,5 +215,4 @@ const api=createApi({
     
 
 export default api
-export const {useMyChatsQuery,useLazySearchUserQuery,useSendFriendRequestMutation,useGetNotificationsQuery,
-    useAcceptFriendRequestMutation,useChatDetailsQuery,useGetMessagesQuery, useSendAttachmentsMutation, useMyGroupsQuery,useAvailableFriendsQuery,useNewGroupMutation,useRenameGroupMutation,useRemoveGroupMemberMutation,useAddGroupMemberMutation,useFriendsDetailsQuery,useDeleteChatMutation,useLeaveGroupMutation,useForgotPasswordMutation}=api
+export const {useMyChatsQuery,useLazySearchUserQuery,useSendFriendRequestMutation,useCancelRequestMutation,useGetNotificationsQuery,useAcceptFriendRequestMutation,useChatDetailsQuery,useGetMessagesQuery, useSendAttachmentsMutation, useMyGroupsQuery,useAvailableFriendsQuery,useNewGroupMutation,useRenameGroupMutation,useRemoveGroupMemberMutation,useAddGroupMemberMutation,useFriendsDetailsQuery,useDeleteChatMutation,useLeaveGroupMutation,useForgotPasswordMutation}=api

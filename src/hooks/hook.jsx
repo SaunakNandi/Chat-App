@@ -25,6 +25,7 @@ export const useAsyncMutation=(mutationHook)=>{
         const toastId=toast.loading(toastMessage || "Updating data...")
         try {
               const res= await mutate(...args)
+              console.log(res)
               if(res.data)
               {
                 // {id:toastId} this will remove the loading toast

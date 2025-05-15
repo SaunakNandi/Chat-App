@@ -5,7 +5,7 @@ import { Search as SearchIcon } from '@mui/icons-material'
 import UserItem from '../shared/UserItem'
 import { useDispatch, useSelector } from 'react-redux'
 import { setIsSearch } from '../../redux/reducers/misc'
-import { useLazySearchUserQuery, useSendFriendRequestMutation } from '../../redux/api/api'
+import { useCancelRequestMutation, useLazySearchUserQuery, useSendFriendRequestMutation } from '../../redux/api/api'
 import { useAsyncMutation } from '../../hooks/hook'
 const SearchBox = () => {
   const search = useInputValidation('')
@@ -15,8 +15,12 @@ const SearchBox = () => {
   const [users,setUsers]=useState([])
   const [searchUser]=useLazySearchUserQuery()
   const [sendFrndReq,isLoadingSendFriendReq]=useAsyncMutation(useSendFriendRequestMutation)
+  const [cancelFrndReq,isLoadingCancelFriendReq]=useAsyncMutation(useCancelRequestMutation)
   const addFriendHandler=async(id)=>{
     await sendFrndReq("Sending friend requst...",{userId:id})
+  }
+  const cancelRequestHandler=async(id)=>{
+    await cancelFrndReq("Revoking your request...",{userId:id})
   }
   const searchCloseHandler=()=>{
     dispatch(setIsSearch(false))
@@ -57,7 +61,7 @@ const SearchBox = () => {
           { users && 
             users.map((x)=>(
               <UserItem user={x} key={x._id} 
-              handler={addFriendHandler} handlerIsLoading={isLoadingSendFriendReq}/>
+              handler={addFriendHandler} cancelRequestHandler={cancelRequestHandler} handlerIsLoading={isLoadingSendFriendReq}/>
             ))
           }
         </List>
