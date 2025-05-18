@@ -18,6 +18,7 @@ import { useSocketEvents } from '../../hooks/hook'
 import { getOrSaveFromStorage } from '../lib/Feature.js'
 import DeleteChatMenu from '../DeleteChatMenu.jsx'
 import chatapp_img_no_friends from '../../assets/chatapp_img_no_friends.png';
+import GroupProfile from '../specific/GroupProfile.jsx'
 // HOC
 // AppLayout is an arrow function that returns another function (WrappedComponent) => {}.
 
@@ -32,6 +33,7 @@ const AppLayout = () =>(WrappedComponent)=> {
     const {user}=useSelector((state)=>state.auth)
     const {newMessagesAlert}=useSelector((state)=>state.chat)
     const navigate=useNavigate()
+    const [isGroupChat,setIsGroupChat]=useState(false)
     const [onlineUsers,setOnlineUsers]=useState([])
     let chatDetails
     if(chatId)
@@ -41,8 +43,16 @@ const AppLayout = () =>(WrappedComponent)=> {
     const friendsID=members && members.filter((x)=>x!=user._id)
     // console.log("friendsID",friendsID && friendsID[0])
     const {isLoading,data,isError,error,refetch}=useMyChatsQuery("")
+    // console.log("Data.chat is ", data?.chats,chatId)
     
+    useEffect(()=>{
+        const groupChat=data?.chats.filter(item=>(item._id==chatId && item.groupChat))
+        if(groupChat && groupChat.length>0)
+            setIsGroupChat(true)
+        else setIsGroupChat(false)
+    },[data?.chats,chatId])
     const deleteMenuAnchor=useRef(null)
+    
     useEffect(()=>{
         // when we loads the page, in the newMessagesAlert get reset =>{chatId: "", count: 0} and new message is not visible
         // to solve this we will store the newMessagesAlert in localStorage and change the initilization of newMessagesAlert in chat.js
@@ -173,7 +183,8 @@ const AppLayout = () =>(WrappedComponent)=> {
                         bgcolor: "rgba(90, 88, 88, 0.85)",
                     }}
                 >
-                    { friendsID && <Profile friendsID={friendsID[0]}/>}
+                    { friendsID && !isGroupChat && <Profile friendsID={friendsID[0]}/>}
+                    { isGroupChat && <GroupProfile chatId={chatId}/> }
                 </Grid>
             </Grid>
         </>

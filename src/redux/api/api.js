@@ -44,7 +44,8 @@ const api=createApi({
                     credentials:'include',
                     body:formData,
                 })
-            }
+            },
+            providesTags:['User']
         }),
 
         forgotPassword:builder.mutation({
@@ -67,6 +68,13 @@ const api=createApi({
             providesTags:["User"]
         }),
 
+        groupDetails:builder.query({
+            query:(chatId)=>({
+                url:`chat/group-details?chatId=${chatId}`,
+                credentials:'include'
+            }),
+            providesTags:["Chat"]
+        }),
         // mutation for POST, PUT, DELETE
         sendFriendRequest:builder.mutation({
             query:(data)=>({
@@ -111,6 +119,7 @@ const api=createApi({
             // u can find populate in getChatDetails(in server) also
             query:({chatId,populate=false})=>{
                 let url=`chat/${chatId}`
+                console.log("chatId from chatDetails Api",chatId)
                 if(populate) url+="?populate=true"
                 return {
                     url,
@@ -145,12 +154,13 @@ const api=createApi({
             providesTags:["Chat"]  // for caching
         }),
         newGroup:builder.mutation({
-            query:({name,members})=>({
+            query:(formData)=>{
+                return({
                 url:"chat/new",
                 method:"POST",
                 credentials:"include",
-                body:{name,members},
-            }),
+                body:formData,
+            })},
             invalidatesTags:["Chat"] // refetching to load chats for new added friend
         }),
         availableFriends:builder.query({
@@ -215,4 +225,4 @@ const api=createApi({
     
 
 export default api
-export const {useMyChatsQuery,useLazySearchUserQuery,useSendFriendRequestMutation,useCancelRequestMutation,useGetNotificationsQuery,useAcceptFriendRequestMutation,useChatDetailsQuery,useGetMessagesQuery, useSendAttachmentsMutation, useMyGroupsQuery,useAvailableFriendsQuery,useNewGroupMutation,useRenameGroupMutation,useRemoveGroupMemberMutation,useAddGroupMemberMutation,useFriendsDetailsQuery,useDeleteChatMutation,useLeaveGroupMutation,useForgotPasswordMutation}=api
+export const {useMyChatsQuery,useLazySearchUserQuery,useSendFriendRequestMutation,useCancelRequestMutation,useGetNotificationsQuery,useAcceptFriendRequestMutation,useChatDetailsQuery,useGetMessagesQuery, useSendAttachmentsMutation, useMyGroupsQuery,useAvailableFriendsQuery,useNewGroupMutation,useRenameGroupMutation,useRemoveGroupMemberMutation,useAddGroupMemberMutation,useFriendsDetailsQuery,useDeleteChatMutation,useLeaveGroupMutation,useForgotPasswordMutation,useGroupDetailsQuery}=api
