@@ -30,9 +30,9 @@ const Groups = () => {
   const [groupNameUpdatedValue,setGroupNameUpdatedValue]=useState('')
   const chatId=useSearchParams()[0].get('group')
   const myGroups=useMyGroupsQuery("")
-  console.log(chatId)
+  // console.log(chatId)
   let groupDetails=useChatDetailsQuery({chatId,populate:true},{skip:!chatId}) // fetch only when chatId is there
-  console.log(groupDetails?.data)
+  // console.log(groupDetails?.data)
   
   const errors=[
     {

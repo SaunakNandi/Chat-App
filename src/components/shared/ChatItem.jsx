@@ -34,7 +34,7 @@ const ChatItem = ({avatar=[],name,_id,groupChat=false,
                 )}
             </Stack>
             {
-                isOnline && (
+                isOnline && !groupChat && (
                     <Box sx={{
                         position: 'absolute',
                         top: '50%',

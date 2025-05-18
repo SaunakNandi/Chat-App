@@ -137,6 +137,7 @@ const AppLayout = () =>(WrappedComponent)=> {
 
             <Grid container sx={{
                     height: "calc(100vh - 4rem)", // Use sx for styles
+                    overflowY:'hidden'
                 }}>
                 <Grid item size={{ xs: 0, md: 3 }} 
                     sx={{
