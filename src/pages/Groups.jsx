@@ -25,7 +25,7 @@ const Groups = () => {
   const [isMobileMenuOpen,setIsMobileMenuOpen]=useState(true)
   const [isEdit,setIsEdit]=useState(false)
   const [confirmDeleteDialog,setConfirmDeleteDialog]=useState(false)
-  const [groupName,setGroupName]=useState('Group Name')
+  const [groupName,setGroupName]=useState('')
   const [members,setMembers]=useState([])
   const [groupNameUpdatedValue,setGroupNameUpdatedValue]=useState('')
   const chatId=useSearchParams()[0].get('group')
@@ -93,9 +93,12 @@ const Groups = () => {
     removeMembers("Removing Member...",{chatId, userId})
   }
   useEffect(()=>{
-    if (chatId) {
-      setGroupName(`Group Name ${chatId}`);
-      setGroupNameUpdatedValue(`Group Name ${chatId}`);
+    if (chatId && myGroups?.data?.groups) {
+      console.log('myGroups list is',myGroups?.data?.groups)
+      const myGroupName=myGroups?.data?.groups.filter(item=>item._id==chatId)
+      console.log("myGroupName",myGroupName)
+      setGroupName(myGroupName[0].name);
+      setGroupNameUpdatedValue(`${myGroupName[0].name}`);
     }
     return ()=>{
       setGroupNameUpdatedValue('')
@@ -200,7 +203,7 @@ const Groups = () => {
                 // In the UserItem isAdded passed as a prop is true by default. If you pass any props without declaring what it is, in the component side it will be a boolean value which will be true by default.
                 isLoadingRemoveMembers? <CircularProgress/>:
                 members && members.map((x) =>(
-                  <UserItem user={x} key={X._id} isAdded handler={()=>removeMemberHandler(x._id)} 
+                  <UserItem user={x} key={X._id} isAdded cancelRequestHandler={()=>removeMemberHandler(x._id)} 
                   styling={{
                     boxShadow: '0 0 0.5rem rgba(0,0,0,0.2)',
                     padding: '1rem 2rem',
@@ -243,7 +246,7 @@ const Groups = () => {
         },
         backgroundColor:'yellow'
       }} w={'50vw'}>
-        <GroupsList myGroups={samplechats} chatId={chatId} />
+        <GroupsList myGroups={[]} chatId={chatId} />
       </Drawer>
     </Grid>
   )
