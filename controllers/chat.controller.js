@@ -7,16 +7,33 @@ import { ALERT, NEW_ATTACHMENT, NEW_MESSAGE, NEW_MESSAGE_ALERT, REFETCH_CHATS } 
 import { getOtherMember } from "../lib/helper.lib.js"
 
 const newGroupChat=async(req,res,next)=>{
-    const {name,members}=req.body
-    const allMembers=[...members,req.user]
-    await Chat.create({name,groupChat:true,creator:req.user,members:allMembers})
+    const {name,members,bio}=req.body
+    const avatar=req.file
+    const parsedMembers=JSON.parse(members)
+    const allMembers=[...parsedMembers,req.user]
+    
+    // console.log("newGroupChat",avatar,allMembers,name,bio)
+
+    const response=await uploadFilesToCloudinary([avatar])
+    const image={
+        public_id:response[0].public_id,
+        url:response[0].url
+    }
+    await Chat.create({name,groupChat:true,creator:req.user,members:allMembers,avatar:image,bio})
     emitEvent(req,ALERT,allMembers,`Welcome to ${name} group chat`)
-    emitEvent(req,REFETCH_CHATS,members)
+    emitEvent(req,REFETCH_CHATS,parsedMembers)
 
     return res.status(201).json({
         sucess:true,
         messsage:"Group created"
     })
+}
+const groupDetails=async(req,res)=>{
+    const {chatId}=req.query
+    console.log("groupDetails ",chatId)
+    const details=await Chat.findById(chatId).populate("members","name avatar")
+    console.log("chat details is ",details)
+    return res.status(200).json({sucess:true,details})
 }
 const getMyChats=async(req,res,next)=>{
     
@@ -25,7 +42,6 @@ const getMyChats=async(req,res,next)=>{
     
     const transformedChats=chats.map(({_id,name,members,groupChat})=>{
         const otherMember=getOtherMember(members,req.user)
-        // console.log("otherMember ",otherMember)
         const whoseAvatar=groupChat? members.slice(0,3).map(({avatar})=>avatar.url):[otherMember?.avatar?.url]
         // could be done using filter than map
         const memberId=members.reduce((prev,cur)=>{
@@ -183,6 +199,7 @@ const sendAttachment = async function(req,res,next){
 }
 
 const getChatDetails = async function(req,res,next){
+    console.log("getChatDetails=>",req.params.id)
     try {
         // for group chat 
         if(req.query.populate==="true")
@@ -303,4 +320,4 @@ const getMessages=async (req,res,next)=>{
         console.log("get Message Error ",error)
     }
 }
-export {newGroupChat,getMyChats,getMyGroups,addMembers,removeMembers,leaveGroup,sendAttachment,getChatDetails,renameGroup,deleteChat,getMessages}
+export {newGroupChat,getMyChats,getMyGroups,addMembers,removeMembers,leaveGroup,sendAttachment,getChatDetails,renameGroup,deleteChat,getMessages,groupDetails}

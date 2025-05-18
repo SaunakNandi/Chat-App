@@ -1,12 +1,13 @@
 import express from 'express';
 import { isAuthenticated } from '../middlewares/auth.js';
-import { addMembers, deleteChat, getChatDetails, getMessages, getMyChats, getMyGroups, leaveGroup, newGroupChat, removeMembers, renameGroup, sendAttachment } from '../controllers/chat.controller.js';
-import { attachmentsMulter } from '../middlewares/multer.js';
+import { addMembers, deleteChat, getChatDetails, getMessages, getMyChats, getMyGroups, groupDetails, leaveGroup, newGroupChat, removeMembers, renameGroup, sendAttachment } from '../controllers/chat.controller.js';
+import { attachmentsMulter, singleAvatar } from '../middlewares/multer.js';
 import { addMembersValidator, chatIdValidator, newGroupValidator, removeValidator, renameValidator, sendAttachmentsValidator, validateHandler } from '../lib/validators.js';
 const router=express.Router()
 
 router.use(isAuthenticated) 
-router.post('/new',newGroupValidator(),validateHandler,newGroupChat)
+router.post('/new',singleAvatar,newGroupChat)
+router.get('/group-details',groupDetails)
 router.get('/my',getMyChats)
 router.get('/my/groups',getMyGroups)
 router.put('/add-members',addMembersValidator(),validateHandler,addMembers)

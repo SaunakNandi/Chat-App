@@ -18,7 +18,20 @@ const chatSchema = new Schema({
             type: Types.ObjectId,
             ref:"User",
         }
-    ]
+    ],
+    avatar:{
+        public_id:{
+            type:String,
+            // required:true,
+        },
+        url:{
+            type:String,
+            // required:true,
+        }
+    },
+    bio:{
+        type: String,
+    }
 },{timestamps:true});
 
 export const Chat=model("Chat",chatSchema)
