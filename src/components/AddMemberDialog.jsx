@@ -15,6 +15,9 @@ const AddMemberDialog = ({chatId}) => {
     const selectMemberHandler=(id)=>{
         setSelectedMembers(prev=> prev.includes(id)? prev.filter((curr)=>curr!==id):[...prev,id])
     }
+    const deselectMembers=(selectedId)=>{
+        setSelectedMembers(prev=>prev.filter(id=>id!=selectedId))
+    }
     const addMemberSubmit=()=>{
         addMembers("Adding Members...",{members:selectedMembers,chatId})
         closeHandler()
@@ -34,6 +37,7 @@ const AddMemberDialog = ({chatId}) => {
                     data.availableFriends?.length>0?(
                         data.availableFriends?.map(x=>(
                             <UserItem user={x} key={x._id} handler={()=>selectMemberHandler(x._id)}
+                            cancelRequestHandler={deselectMembers}
                             isAdded={
                                 selectedMembers.includes(x._id)
                             }/>
@@ -43,7 +47,7 @@ const AddMemberDialog = ({chatId}) => {
             </Stack>
             <Stack direction={'row'} justifyContent={'space-between'} alignItems={'center'}>
                 <Button color='error' onClick={closeHandler}>Cancel</Button>
-                <Button color='contained' onClick={addMemberSubmit} disabled={isLoadingAddMembers}>Submit Changes</Button>
+                <Button color='contained' onClick={addMemberSubmit} disabled={isLoadingAddMembers}>Add</Button>
             </Stack>
         </Stack>
     </Dialog>
