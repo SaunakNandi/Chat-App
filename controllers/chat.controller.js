@@ -212,7 +212,9 @@ const getChatDetails = async function(req,res,next){
                 _id,
                 name,
                 avatar:avatar.url
-            }))
+            })).filter((item)=>item._id.toString()!=req.user)
+            
+            console.log("Request user wants to know member ",chat.members)
             // console.log("chat members after",chat.members)
             return res.status(201).json({
                 sucess:true,
