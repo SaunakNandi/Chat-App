@@ -3,10 +3,15 @@ import { Link } from '../styles/StyledComponent'
 import { Box, Stack, Typography } from '@mui/material'
 import AvatarCard from './AvatarCard'
 import {motion} from 'framer-motion'
+import { useGroupDetailsQuery } from '../../redux/api/api'
 
 const ChatItem = ({avatar=[],name,_id,groupChat=false,
     sameSender,isOnline,newMessageAlert,handleDeleteChat}) => {
         // console.log(newMessageAlert)
+    let response={}
+    if(groupChat)
+        response=useGroupDetailsQuery(_id)
+    const data=response?.data?.details
   return (
     <Link to={`/chat/${_id}`} onContextMenu={(e)=>handleDeleteChat(e,_id,groupChat)}
     sx={{
@@ -26,7 +31,7 @@ const ChatItem = ({avatar=[],name,_id,groupChat=false,
             position: 'relative',
         }}>
             {/* Avatar Card */}
-            <AvatarCard avatar={avatar}/>
+            <AvatarCard avatar={data? [data.avatar.url]:avatar}/>
             <Stack>
                 <Typography>{name}</Typography>
                 {newMessageAlert && (
