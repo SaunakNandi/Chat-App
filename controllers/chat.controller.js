@@ -160,7 +160,7 @@ const leaveGroup=async(req,res,next)=>{
     }
     chat.members=remainingMembers
     const [user]=await Promise.all([User.findById(req.user,"name"),chat.save()])  
-    emitEvent(req,ALERT,chat.members,{message:`${userToRemove.name} has been removed from the group`,chatId})
+    emitEvent(req,ALERT,chat.members,{message:`User ${user.name} has left the group`,chatId})
     return res.status(201).json({
         sucess:true,
         messsage:"Left the group"    
