@@ -1,4 +1,4 @@
-import React, { useCallback, useRef, useState,useEffect } from 'react'
+import { useCallback, useRef, useState,useEffect } from 'react'
 import AppLayout from '../components/layout/AppLayout'
 import { gray, orange } from '../constants/Color'
 import { IconButton, Skeleton, Stack } from '@mui/material'
@@ -153,7 +153,6 @@ const Chat = ({chatId,user,chatDetails}) => {
   useErrors(errors) 
 
   const allMessages=[...oldMessages,...messages]
-  
   // console.log("User is Typing ",userTyping)
   return chatDetails.isLoading? <Skeleton/>:(
     <>
@@ -165,11 +164,9 @@ const Chat = ({chatId,user,chatDetails}) => {
         {/* Messages */}
         {
           allMessages.map((msg)=>{
-            // console.log("msg.id ",typeof msg._id)
-            const id=typeof msg=='undefined'? Math.floor(Math.random()*99999):msg._id+Math.floor(Math.random()*99999)
             return(
             <MessageComponent message={msg} user={user} 
-            key={id}/>
+            key={msg._id}/>
           )})
         }
         {userTyping && <TypingLoader ref={bottomRef}/>}

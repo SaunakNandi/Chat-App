@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import { useState } from 'react'
 import {Container,Paper,Typography,Button,TextField, Stack, Avatar, IconButton} from '@mui/material'
 import { CameraAlt } from '@mui/icons-material'
 import { VisuallyHiddenInput } from '../components/styles/StyledComponent'
@@ -11,8 +11,7 @@ import toast from 'react-hot-toast'
 import {server} from '../constants/config'
 import { Link } from 'react-router-dom'
 
-const usernameRegex = /^[a-zA-Z0-9_]{4,16}$/; // Example: 4-16 chars, letters/numbers/underscore
-const passwordRegex = /^(?=.*[A-Z])(?=.*\d)[A-Za-z\d@$!%*?&]{6,}$/; // Example: 6+ chars, 1 upper, 1 number
+const usernameRegex = /^[a-zA-Z0-9_]{4,30}$/; // Example: 4-16 chars, letters/numbers/underscore
 const nameRegex = /^[A-Za-z ]{2,50}$/;
 const Login = () => {
   const [isLogin, setIsLogin] = useState(true)
@@ -80,11 +79,12 @@ const Login = () => {
   }
   
   const handleLogin=async(e)=>{
+    console.log("Is  this getting called? ")
     e.preventDefault()
     const newError={}
     const usernameVal=username.value.trim()
     if(!usernameRegex.test(usernameVal)) newError.username='Expects atleast 4 chars any of the following letters,numbers,underscore'
-
+    console.log("error ",errors)
     setErrors(newError)
     if(Object.keys(newError).length>0) return
     const toastId = toast.loading("Logging In...");
@@ -124,8 +124,14 @@ const Login = () => {
               <form style={{width:'100%',marginTop:"1rem"}} onSubmit={handleLogin}>
                 <TextField required label="Username" margin="normal" variant="outlined" fullWidth
                 value={username.value} onChange={username.changeHandler}/>
+                {
+                  errors.username && <Typography>{setErrors.username}</Typography>
+                }
                 <TextField required label="Password" margin="normal" variant="outlined" fullWidth type="password"
                 value={password.value} onChange={password.changeHandler}/>
+                {
+                  errors.password && <Typography>{setErrors.password}</Typography>
+                }
                 <Button sx={{marginTop:'1rem'}} variant="contained" color="primary" type="submit" fullWidth
                 disabled={isLoading}>Login</Button>
                 <Link to={'/forgotpassword'} style={{textAlign:'center'}}>Forgot Password</Link>
