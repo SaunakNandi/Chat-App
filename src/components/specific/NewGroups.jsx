@@ -41,6 +41,7 @@ const NewGroups = () => {
     const formData=new FormData()
     formData.append('name',groupName.value)
     formData.append('members',JSON.stringify(selectedMembers))
+    
     if (avatar?.file)
       formData.append('avatar',avatar.file)
     formData.append('bio',bioRef.current.value)

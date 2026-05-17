@@ -1,29 +1,29 @@
-import React, { useCallback, useEffect, useRef, useState } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
 import Header from './Header'
 import Title from '../shared/Title'
 import Grid from '@mui/material/Grid2'
 import ChatList from '../specific/ChatList'
-// import { samplechats } from '../../constants/sample_data'
 import { useNavigate, useParams } from 'react-router-dom'
 import Profile from '../specific/Profile'
 import { useMyChatsQuery, useChatDetailsQuery } from '../../redux/api/api'
-import { Drawer, Skeleton, Stack } from '@mui/material'
+import { Drawer, Skeleton } from '@mui/material'
 import { useDispatch, useSelector } from 'react-redux'
 import { setIsDeletemenu, setIsMobile, setSelectedDeleteChat } from '../../redux/reducers/misc'
 import { useErrors } from '../../hooks/hook'
 import { getSocket } from '../../socket'
-import { NEW_REQUEST, NEW_MESSAGE_ALERT, REFETCH_CHATS, ONLINE_USERS } from '../../constants/events'
+import { ALERT, NEW_REQUEST, NEW_MESSAGE_ALERT, REFETCH_CHATS, ONLINE_USERS } from '../../constants/events'
 import { incrementNotifications, setNewMessagesAlert } from '../../redux/reducers/chat'
 import { useSocketEvents } from '../../hooks/hook'
 import { getOrSaveFromStorage } from '../lib/Feature.js'
 import DeleteChatMenu from '../DeleteChatMenu.jsx'
 import chatapp_img_no_friends from '../../assets/chatapp_img_no_friends.png';
 import GroupProfile from '../specific/GroupProfile.jsx'
+import toast from 'react-hot-toast'
 // HOC
 // AppLayout is an arrow function that returns another function (WrappedComponent) => {}.
 
 const AppLayout = () =>(WrappedComponent)=> {
-  return (props)=>{
+  const LayoutComponent= (props)=>{
     const socket=getSocket()
     // console.log(socket.id)
     const params=useParams()
@@ -35,9 +35,7 @@ const AppLayout = () =>(WrappedComponent)=> {
     const navigate=useNavigate()
     const [isGroupChat,setIsGroupChat]=useState(false)
     const [onlineUsers,setOnlineUsers]=useState([])
-    let chatDetails
-    if(chatId)
-        chatDetails=useChatDetailsQuery({chatId,skip:!chatId})  // only call when chatId is there
+    const chatDetails = useChatDetailsQuery({ chatId }, { skip: !chatId })
     
     const members=chatDetails?.data?.chat?.members
     const friendsID=members && members.filter((x)=>x!=user._id)
@@ -77,7 +75,6 @@ const AppLayout = () =>(WrappedComponent)=> {
     },[chatId])
 
     const newRequestListener =useCallback(()=>{
-        // console.log("New message")
         dispatch(incrementNotifications())
     },[dispatch])
 
@@ -172,7 +169,8 @@ const AppLayout = () =>(WrappedComponent)=> {
                     {/* Chat component can be accessed from this WrappedComponent */}
                     {
                         chatDetails &&  
-                        <WrappedComponent  // {...props} 
+                        <WrappedComponent  
+                        {...props} 
                         chatId={chatId} user={user} chatDetails={chatDetails}/>
                     }
                 </Grid>
@@ -190,7 +188,10 @@ const AppLayout = () =>(WrappedComponent)=> {
             </Grid>
         </>
     )
-  }
+}
+    LayoutComponent.displayName = `AppLayout(${WrappedComponent.displayName || WrappedComponent.name || 'Component'})`
+
+    return LayoutComponent
 }
 
 export default AppLayout

@@ -111,7 +111,8 @@ const api=createApi({
                 url:`user/notifications`,
                 credentials:"include"
             }),
-            keepUnusedDataFor:0  // no caching
+            keepUnusedDataFor:0,  // no caching
+            providesTags:["User"]
         }),
 
         chatDetails:builder.query({
@@ -217,6 +218,14 @@ const api=createApi({
                 credentials:"include",
             }),
             invalidatesTags:["Chat"]
+        }),
+        clearNotification: builder.mutation({
+            query:(notificationId)=>({
+                url:`user/clear-notification?id=${notificationId}`,
+                method:"DELETE",
+                credentials:'include'
+            }),
+            invalidatesTags:["User"]
         })
     })
 })
@@ -225,4 +234,4 @@ const api=createApi({
     
 
 export default api
-export const {useMyChatsQuery,useLazySearchUserQuery,useSendFriendRequestMutation,useCancelRequestMutation,useGetNotificationsQuery,useAcceptFriendRequestMutation,useChatDetailsQuery,useGetMessagesQuery, useSendAttachmentsMutation, useMyGroupsQuery,useAvailableFriendsQuery,useNewGroupMutation,useRenameGroupMutation,useRemoveGroupMemberMutation,useAddGroupMemberMutation,useFriendsDetailsQuery,useDeleteChatMutation,useLeaveGroupMutation,useForgotPasswordMutation,useGroupDetailsQuery}=api
+export const {useMyChatsQuery,useLazySearchUserQuery,useSendFriendRequestMutation,useCancelRequestMutation,useGetNotificationsQuery,useAcceptFriendRequestMutation,useChatDetailsQuery,useGetMessagesQuery, useSendAttachmentsMutation, useMyGroupsQuery,useAvailableFriendsQuery,useNewGroupMutation,useRenameGroupMutation,useRemoveGroupMemberMutation,useAddGroupMemberMutation,useFriendsDetailsQuery,useDeleteChatMutation,useLeaveGroupMutation,useForgotPasswordMutation,useGroupDetailsQuery,useClearNotificationMutation}=api

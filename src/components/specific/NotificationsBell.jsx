@@ -1,15 +1,16 @@
+/* eslint-disable react/display-name */
 import { Dialog, DialogTitle, ListItem, Stack, Typography, Avatar, Button, Skeleton } from '@mui/material'
-import React, { memo } from 'react'
-import { useAcceptFriendRequestMutation, useGetNotificationsQuery } from '../../redux/api/api'
+import { memo, useEffect } from 'react'
+import { useAcceptFriendRequestMutation, useClearNotificationMutation, useGetNotificationsQuery } from '../../redux/api/api'
 import { useAsyncMutation, useErrors } from '../../hooks/hook'
 import { useDispatch, useSelector } from 'react-redux'
 import { setIsNotification } from '../../redux/reducers/misc'
-import toast from 'react-hot-toast'
 const NotificationsBell = () => {
 
   // data will get this from server json({success:true,request:all_requests})
   const {isLoading,data,error,isError}=useGetNotificationsQuery()
   const [acceptRequest]=useAsyncMutation(useAcceptFriendRequestMutation)
+  const [clearNotification]=useAsyncMutation(useClearNotificationMutation)
   const {isNotification}=useSelector(state=>state.misc)
   const dispatch = useDispatch()
   // this can be put in hook.js also like useAsyncMutation(useSendFriendRequestMutation)
@@ -20,8 +21,12 @@ const NotificationsBell = () => {
   const closeHandler=()=>{
     dispatch(setIsNotification(false))
   }
+
+  const dismissHandler=async(id)=>{
+    await clearNotification("clear notifications ",id) // notification id
+  }
+
   useErrors([{error,isError}])
-  console.log(data)
   return (
     <Dialog open={isNotification} onClose={closeHandler}>
       <Stack p={{xs:'1rem',sm:"2rem"}} maxWidth={'25rem'}>
@@ -33,7 +38,7 @@ const NotificationsBell = () => {
                 data?.request.length > 0 ? (
                   data.request?.map(notification => (
                     <NotificationItem key={notification._id} _id={notification._id}
-                      sender={notification.sender} handler={frndReqHandler} />
+                      notify={notification} handler={frndReqHandler} onDismiss={()=>dismissHandler(notification._id)}/>
                   ))
                 ) : (
                   <Typography textAlign={'center'}>0 Notifications</Typography>
@@ -48,7 +53,8 @@ const NotificationsBell = () => {
 }
 // NotificationItem shouldn't get re-rendered until and unless its props changes
 const NotificationItem=memo(
-  ({sender,_id,handler})=>{
+  ({notify,_id,handler,onDismiss})=>{
+    const {sender,message,type}=notify
     const {name,avatar} = sender
     return (
       <ListItem >
@@ -65,15 +71,21 @@ const NotificationItem=memo(
                 textOverflow:"ellipsis",
                 width:"100%",
             }}>
-              {`${name} sent you a friend request`}
+              {
+                type==="FRIEND_REQUEST"? `${name} sent you a friend request`:message
+              }
             </Typography>
-            <Stack direction={{
-              xs:'column',
-              sm:'row'
-            }}>
-              <Button onClick={()=>handler({_id,accept:true})}>Accept</Button>
-              <Button color='error' onClick={()=>handler({_id,accept:false})}>Reject</Button>
-            </Stack>
+            { type === "FRIEND_REQUEST" ? (
+              <Stack direction={{ xs: 'column', sm: 'row' }}>
+                <Button onClick={() => handler({ _id, accept: true })}>Accept</Button>
+                <Button color='error' onClick={() => handler({ _id, accept: false })}>Reject</Button>
+              </Stack>
+            ) : (
+              /* If group alert, render a clean Dismiss toggle action */
+              <Button size="small" color="secondary" onClick={() => onDismiss(_id)}>
+                Dismiss
+              </Button>
+            )}
         </Stack>
       </ListItem>
     )
