@@ -16,7 +16,15 @@ const requestSchema = new Schema({
         ref:"User",
         required:true,
     },
+    type:{
+        type:String,
+        enum:["FRIEND_REQUEST","GROUP_ALERT"],
+        required:true
+        
+    },
+    message:{
+        type:String
+    }
 },{timestamps:true});
 
 export const Request=model("Request",requestSchema)
-// export const User=mongoose.models.User || model("User",userSchema)

@@ -35,6 +35,7 @@ const emitEvent=(req,event,users,data)=>{
 //this can be used to upload image/multiple files
 
 const uploadFilesToCloudinary=async(files=[])=>{
+    if(files.length===0) return null
     const uploadPromises=files.map((file)=>{
         // take everything in promise and resolve all at once using Promise.all
         return new Promise((resolve,reject)=>{

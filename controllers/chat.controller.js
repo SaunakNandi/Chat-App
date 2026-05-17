@@ -3,9 +3,9 @@ import {Chat} from '../models/chat.models.js'
 import {User} from '../models/user.models.js'
 import {Message} from '../models/message.models.js'
 import { deleteFilesFromCloudinary, emitEvent, uploadFilesToCloudinary } from "../utils/features.js"
-import { ALERT, NEW_ATTACHMENT, NEW_MESSAGE, NEW_MESSAGE_ALERT, REFETCH_CHATS } from "../constants/events.js"
+import { ALERT, NEW_ATTACHMENT, NEW_MESSAGE, NEW_MESSAGE_ALERT, NEW_REQUEST, REFETCH_CHATS } from "../constants/events.js"
 import { getOtherMember } from "../lib/helper.lib.js"
-
+import { Request } from "../models/request.models.js"
 const newGroupChat=async(req,res,next)=>{
     const {name,members,bio}=req.body
     const avatar=req.file
@@ -112,6 +112,17 @@ const addMembers=async(req,res,next)=>{
     await chat.save()
     const allUsersName=allNewMembers.map(x=>x.name).join(",") // [a,b,c] -> ["a", "b", "c"]
     // console.log("all users",allUsersName)
+
+    const notificationToCreate=uniqueMembers.map(userId=>{
+        return {
+            sender:req.user,
+            receiver:userId,
+            type:"GROUP_ALERT",
+            message:`You have been added to ${chat.name}`
+        }
+    }) 
+    await Request.insertMany(notificationToCreate)
+    emitEvent(req,NEW_REQUEST,uniqueMembers)
     emitEvent(req,ALERT,chat.members,{message:`${allUsersName} has been added to ${chat.name} group`,chatId})
     emitEvent(req,REFETCH_CHATS,chat.members)
     return res.status(201).json({

@@ -23,12 +23,12 @@ const login=async(req,res,next)=>{
     }
 }
 
-const newUser=async(req,res)=>{
+const newUser=async(req,res,next)=>{
     try {
         const {name,username,password,bio} = req.body
         // console.log(req.body)
         const file=req.file
-        if(!file) return next(new ErrorHandler('Please upload file',11000))
+        if(!file) return next(new ErrorHandler('Please upload Image',11000))
             
         const isUsernameExist = await User.findOne({username})
         if(isUsernameExist) return next(new ErrorHandler('Username already exist',502))
@@ -96,24 +96,37 @@ const searchUser=async(req,res)=>{
     
     // finding all my connections
     const myChats=await Chat.find({groupChat:false,members:req.user})  // getting req.user from isAuthenticated
-    const allUsersFromMyChats=myChats.flatMap((chat)=>chat.members)  // chat.members is an array itself
+    const allUsersFromMyChats=myChats.flatMap((chat)=>chat.members.map(id => id.toString()))  // chat.members is an array itself
     // $regex is built-in property in mongoose. So suppose if name is Saunak and user search sau -> it will return user with name saunak and options "i" for case insensitive
-    // console.log("allUsersFromMyChats",allUsersFromMyChats)
-    const currentUserObjectId = new mongoose.Types.ObjectId(String(id));  // converting to string for VScode warning
-    const nottoConsiderThoseids=allUsersFromMyChats.length?[...allUsersFromMyChats,currentUserObjectId]:[currentUserObjectId]
-    
-    // find all users excluding those whom I have sent request
+
     const requests=await Request.find({sender:req.user})//.populate('receiver','_id')
     const receiverIds=requests.map(item=>item.receiver.toString())
-    const excludeIds=[...nottoConsiderThoseids,...receiverIds]
+    // console.log("allUsersFromMyChats",allUsersFromMyChats)
+    // const currentUserObjectId = new mongoose.Types.ObjectId(String(id));  // converting to string for VScode warning
+    // const nottoConsiderThoseids=allUsersFromMyChats.length?[...allUsersFromMyChats,currentUserObjectId]:[currentUserObjectId]
+    
+    // // find all users excluding those whom I have sent request
+    
+    // const excludeIds=[...nottoConsiderThoseids,...receiverIds]
+
+    const excludeIdsStrings=[...allUsersFromMyChats,...receiverIds,req.user.toString()]
+    const excludeObjectIds = excludeIdsStrings.map(id => new mongoose.Types.ObjectId(id));
+    console.log("ExcludedIds ",excludeObjectIds)
     const allUsersExceptMeandFriends=await User.find({
-        _id:{$nin:excludeIds},
-        name:{$regex:name,$options:"i"}  
+        _id:{$nin:excludeObjectIds},
+        $or:[
+            {name:{$regex:name,$options:"i"}},
+            {username:{$regex:name,$options:"i"}}  
+        ]
     })
 
-    // console.log("allUsersExceptMeandFriends ",allUsersExceptMeandFriends)
+    console.log("allUsersExceptMeandFriends ",allUsersExceptMeandFriends)
     //modifying the response 
-    const users=allUsersExceptMeandFriends.map(({_id,name,avatar})=>({_id,name,avatar:avatar.url}))
+    const users=allUsersExceptMeandFriends.map(({_id,name,avatar})=>({_id,name,avatar:avatar.url || ""}))
+
+    const allUsers = await User.find({});
+    console.log("All available users ",allUsers)
+    console.log("Available Users ",users)
     return res.status(200).json({success:true,users})
 }
 
@@ -177,15 +190,35 @@ const acceptFrndReq=async(req,res,next)=>{
 const getMyNotifications=async(req,res)=>{
     const request=await Request.find({receiver:req.user}).populate("sender","name avatar")
     // console.log(request)
-    const all_requests= request.map(({_id,sender})=>({
+    const all_requests= request.map((reqDoc)=>{
+        const {sender,_id,message}=reqDoc
+        return {
         _id,
+        type:reqDoc.type || "FRIEND_REQUEST",
+        message,
         sender:{
             _id:sender._id,
             name:sender.name,
             avatar:sender.avatar.url
         }
-    }))
+    }})
     return res.status(200).json({success:true,request:all_requests})
+}
+
+const clearNotification=async(req,res,next)=>{
+    const {id}=req.query
+    try {
+        if(!id) return next(new ErrorHandler("Notification ID is required", 400));
+        const notification=await Request.findById(id)
+        if(!notification) return next(new ErrorHandler("No  notificaiton found"));
+        if(notification.receiver.toString()!==req.user.toString())
+            return next(new ErrorHandler("You are not authorisized to access this notification "));
+        await notification.deleteOne()
+        return res.status(200).json({success:true,message: "Notification dismissed successfully"})
+    } catch (error) {
+        console.log("Error is given by ",error)
+        return res.status(500).json({success:false,message:`error while deleting notification ${error}`})
+    }
 }
 
 // need frontend to understand this better
@@ -254,4 +287,4 @@ const updateMyProfile=async(req,res,next)=>{
         console.log("Error at update my profile ",error)
     }
 }
-export {login,newUser,getMyProfile,logout,searchUser,sendFrndReq,acceptFrndReq,getMyNotifications,getMyFriends,getUserDetails,updateMyProfile,forgotPassword,cancelFrndReq}
+export {login,newUser,getMyProfile,logout,searchUser,sendFrndReq,acceptFrndReq,getMyNotifications,getMyFriends,getUserDetails,updateMyProfile,forgotPassword,cancelFrndReq,clearNotification}
