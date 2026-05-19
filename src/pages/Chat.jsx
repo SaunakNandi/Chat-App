@@ -141,11 +141,17 @@ const Chat = ({chatId,user,chatDetails}) => {
       setMessages((prev) => [...prev, messageForAlert]);
   },[chatId])
   // [NEW_MESSAGE] is a dynammic variable, writting in this way means {'NEW_MESSAGE':newMessageHandler}
+
+  const handleReconnection=useCallback(()=>{
+    socket.emit(CHAT_JOINED,{userId:user._id,members,chatId})
+  },[user._id,members,chatId])
+
   const eventHandlerArr={
     [ALERT]:alertListner,
     [NEW_MESSAGE]:newMessagesListner,
     [START_TYPING]:startTypingListner,
-    [STOP_TYPING]:stopTypingListner
+    [STOP_TYPING]:stopTypingListner,
+    "connect":handleReconnection
   }   
   
   // custom hook

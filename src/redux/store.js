@@ -3,6 +3,7 @@ import authSlice from "./reducers/auth";
 import api from "./api/api";
 import miscSlice from "./reducers/misc";
 import chatSlice from "./reducers/chat";
+import { setupListeners } from "@reduxjs/toolkit/query";
 
 const store=configureStore({
     reducer:{
@@ -21,6 +22,7 @@ const store=configureStore({
         // Request lifecycle handling (loading, success, error)
 
     middleware:(defaultMiddleware)=>[...defaultMiddleware(),api.middleware]
+   
 })
-
+setupListeners(store.dispatch)
 export default store; 
